@@ -1,24 +1,49 @@
-import { StyleSheet, View } from "react-native";
+import { View } from "@/components/layout/View";
+import { fs } from "@/services/fs";
+import { FlatList, Pressable } from "react-native";
+import { Text } from "tamagui";
+
+const data = [
+  `Lorem ipsum, dolor sit amet consectetur adipisicing elit. Incidunt beatae repellendus nostrum nesciunt asperiores odit omnis dolorum, quisquam itaque natus obcaecati quasi iste accusamus consequuntur, soluta reiciendis corrupti placeat adipisci?`,
+  `Lorem ipsum, dolor sit amet consectetur adipisicing elit. Incidunt beatae repellendus nostrum nesciunt asperiores odit omnis dolorum, quisquam itaque natus obcaecati quasi iste accusamus consequuntur, soluta reiciendis corrupti placeat adipisci?`,
+  `Lorem ipsum, dolor sit amet consectetur adipisicing elit. Incidunt beatae repellendus nostrum nesciunt asperiores odit omnis dolorum, quisquam itaque natus obcaecati quasi iste accusamus consequuntur, soluta reiciendis corrupti placeat adipisci?`,
+  `Lorem ipsum, dolor sit amet consectetur adipisicing elit. Incidunt beatae repellendus nostrum nesciunt asperiores odit omnis dolorum, quisquam itaque natus obcaecati quasi iste accusamus consequuntur, soluta reiciendis corrupti placeat adipisci?`,
+  `Lorem ipsum, dolor sit amet consectetur adipisicing elit. Incidunt beatae repellendus nostrum nesciunt asperiores odit omnis dolorum, quisquam itaque natus obcaecati quasi iste accusamus consequuntur, soluta reiciendis corrupti placeat adipisci?`,
+  `Lorem ipsum, dolor sit amet consectetur adipisicing elit. Incidunt beatae repellendus nostrum nesciunt asperiores odit omnis dolorum, quisquam itaque natus obcaecati quasi iste accusamus consequuntur, soluta reiciendis corrupti placeat adipisci?`,
+  `Lorem ipsum, dolor sit amet consectetur adipisicing elit. Incidunt beatae repellendus nostrum nesciunt asperiores odit omnis dolorum, quisquam itaque natus obcaecati quasi iste accusamus consequuntur, soluta reiciendis corrupti placeat adipisci?`,
+  `Lorem ipsum, dolor sit amet consectetur adipisicing elit. Incidunt beatae repellendus nostrum nesciunt asperiores odit omnis dolorum, quisquam itaque natus obcaecati quasi iste accusamus consequuntur, soluta reiciendis corrupti placeat adipisci?`,
+  `Lorem ipsum, dolor sit amet consectetur adipisicing elit. Incidunt beatae repellendus nostrum nesciunt asperiores odit omnis dolorum, quisquam itaque natus obcaecati quasi iste accusamus consequuntur, soluta reiciendis corrupti placeat adipisci?`,
+  `Lorem ipsum, dolor sit amet consectetur adipisicing elit. Incidunt beatae repellendus nostrum nesciunt asperiores odit omnis dolorum, quisquam itaque natus obcaecati quasi iste accusamus consequuntur, soluta reiciendis corrupti placeat adipisci?`,
+];
 
 export default function HomeScreen() {
-  return <View></View>;
+  const COLUMNS_COUNT = 3;
+  // fs();
+  return (
+    <View flex={1}>
+      <FlatList
+        key={COLUMNS_COUNT}
+        data={[...data, ...data, ...data, ...data]}
+        numColumns={COLUMNS_COUNT}
+        // keyExtractor={(item, index) => `${index}`}
+        style={{ width: "100%" }}
+        contentContainerStyle={{ gap: 4 }}
+        columnWrapperStyle={{ gap: 4 }}
+        renderItem={({ item, index }) => (
+          <Pressable
+            onPress={fs}
+            style={{
+              width: 100,
+              aspectRatio: 1,
+              backgroundColor: "#ffffff20",
+              // justifyContent: "center",
+              // alignItems: "center",
+            }}
+          >
+            <Text>{item}</Text>
+          </Pressable>
+        )}
+      />
+    </View>
+  );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: "absolute",
-  },
-});
