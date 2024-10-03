@@ -1,19 +1,28 @@
 import defaultConfig from "@tamagui/config/v3";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Slot, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
-import { createTamagui } from "tamagui";
+import { createTamagui, TamaguiProvider, Theme, useTheme } from "tamagui";
 
 import { ThemeProvider } from "@/components/core/ThemeProvider";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar, useColorScheme } from "react-native";
 
-const config = createTamagui(defaultConfig);
+const tamaguiConfig = createTamagui(defaultConfig);
+
+// TypeScript types across all Tamagui APIs
+type Conf = typeof tamaguiConfig;
+declare module "@tamagui/core" {
+  interface TamaguiCustomConfig extends Conf {}
+}
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     Inter: require("../assets/fonts/Inter.ttf"),
   });
@@ -29,13 +38,20 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider>
-      <Stack initialRouteName="gallery">
-        <Stack.Screen name="gallery" options={{ headerShown: false }} />
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
-        <Stack.Screen name="+not-found" />
-      </Stack>
-    </ThemeProvider>
+    <TamaguiProvider config={tamaguiConfig}>
+      <Theme name={colorScheme}>
+        <Routes />
+      </Theme>
+    </TamaguiProvider>
+  );
+}
+
+function Routes() {
+  const { background } = useTheme();
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: background.val }}>
+      <StatusBar translucent backgroundColor={background.val} />
+      <Slot />
+    </SafeAreaView>
   );
 }
