@@ -1,26 +1,19 @@
-import { View } from "@/components/layout/View";
+import { useAlbum, useTokens } from "@/hooks";
 import { useAlbums } from "@/hooks/useAlbums";
-import { useColumns } from "@/zustand/useColumns";
+import { useColumns } from "@/hooks/useColumns";
 import { MasonryFlashList } from "@shopify/flash-list";
-import {
-  Asset,
-  getAlbumsAsync,
-  getAssetsAsync,
-  usePermissions,
-} from "expo-media-library";
-import { Link, Redirect, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import { Image, StatusBar, TouchableOpacity } from "react-native";
-import { Button, getTokens, Text, useTheme, YStack } from "tamagui";
+import { useRouter } from "expo-router";
+import { useEffect } from "react";
+import { Image, TouchableOpacity } from "react-native";
+import { Button, getTokens, Text, useTheme, View, YStack } from "tamagui";
 
 export default function AlbumsPage() {
   const router = useRouter();
 
-  const { albums, hasPermission, getAlbums, requestPermission } = useAlbums();
+  const { albums, hasPermission, requestPermission } = useAlbums();
   const { columns, columnWidth } = useColumns();
 
-  const { size, space, radius } = getTokens();
-  const theme = useTheme();
+  const { space, radius } = useTokens();
 
   if (hasPermission) {
     return (
@@ -44,11 +37,15 @@ export default function AlbumsPage() {
                   padding: space.$2.val,
                 }}
                 onPress={() => {
-                  router.push(`album/${item.id}`);
+                  router.navigate({
+                    pathname: "/album/[albumId]",
+                    params: { albumId: item.id },
+                  });
                 }}
               >
                 <Image
-                  source={{ uri: item.assets[0].uri }}
+                  //   source={{ uri: item.assets[0].uri }}
+                  source={{ uri: item.thumbnail.uri }}
                   style={{
                     width: "100%",
                     aspectRatio: 1,

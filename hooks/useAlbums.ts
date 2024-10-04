@@ -6,12 +6,8 @@ import {
   Album,
 } from "expo-media-library";
 import { useRouter } from "expo-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getTokens, useTheme } from "tamagui";
-
-type CustomAlbum = Album & {
-  assets: Asset[];
-};
 
 export function useAlbums() {
   const [permissionResponse, requestPermission] = usePermissions();
@@ -27,10 +23,9 @@ export function useAlbums() {
     await getAlbumsAsync({
       includeSmartAlbums: false,
     }).then(async (albums) => {
-      console.log(albums[0]);
       for (let album of albums) {
         const asset = await getAssetsAsync({
-          //   first: 1,
+          first: 1,
           album: album,
           sortBy: "modificationTime",
           mediaType: "photo",
@@ -38,7 +33,8 @@ export function useAlbums() {
         if (asset.assets.length > 0) {
           customAlbums.push({
             ...album,
-            assets: asset.assets,
+            thumbnail: asset.assets[0],
+            // assets: asset.assets,
           });
         }
       }
@@ -46,7 +42,7 @@ export function useAlbums() {
     setCustomAlbums(customAlbums);
   }
 
-  useEffect(() => {
+  useMemo(() => {
     if (permissionResponse && permissionResponse.status != "granted") {
       handlePermission();
     } else {
@@ -54,10 +50,19 @@ export function useAlbums() {
     }
   }, [permissionResponse]);
 
-  function getAlbumById(id: string) {
+  async function getAlbumById(id: string) {
     for (let album of customAlbums) {
       if (album.id === id) {
-        return album;
+        const asset = await getAssetsAsync({
+          first: album.assetCount,
+          album: album,
+          sortBy: "modificationTime",
+          mediaType: "photo",
+        });
+        return {
+          ...album,
+          items: asset,
+        };
       }
     }
     return null;

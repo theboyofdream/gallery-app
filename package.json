@@ -22,7 +22,7 @@
     "@shopify/flash-list": "1.6.4",
     "@shopify/react-native-skia": "1.2.3",
     "@tamagui/config": "^1.112.0",
-    "@tamagui/lucide-icons": "^1.112.20",
+    "@tamagui/lucide-icons": "^1.112.22",
     "expo": "51.0.36",
     "expo-blur": "^13.0.2",
     "expo-constants": "~16.0.2",
@@ -47,7 +47,8 @@
     "react-native-screens": "3.31.1",
     "react-native-svg": "^15.7.1",
     "react-native-web": "~0.19.10",
-    "tamagui": "^1.112.0",
+    "react-query": "^3.39.3",
+    "tamagui": "^1.112.22",
     "zustand": "^5.0.0-rc.2"
   },
   "devDependencies": {

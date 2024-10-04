@@ -6,9 +6,9 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 import { createTamagui, TamaguiProvider, Theme, useTheme } from "tamagui";
 
-import { ThemeProvider } from "@/components/core/ThemeProvider";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar, useColorScheme } from "react-native";
+import { QueryClient, QueryClientProvider } from "react-query";
 
 const tamaguiConfig = createTamagui(defaultConfig);
 
@@ -20,6 +20,9 @@ declare module "@tamagui/core" {
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+// Create a client
+const queryClient = new QueryClient()
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -38,11 +41,14 @@ export default function RootLayout() {
   }
 
   return (
+     // Provide the client to your App
+    <QueryClientProvider client={queryClient}>
     <TamaguiProvider config={tamaguiConfig}>
       <Theme name={colorScheme}>
         <Routes />
       </Theme>
     </TamaguiProvider>
+    </QueryClientProvider>
   );
 }
 
@@ -52,6 +58,13 @@ function Routes() {
     <SafeAreaView style={{ flex: 1, backgroundColor: background.val }}>
       <StatusBar translucent backgroundColor={background.val} />
       <Slot />
+      {/* <Stack
+        screenOptions={{
+          contentStyle: {
+            backgroundColor: background.val,
+          },
+        }}
+      /> */}
     </SafeAreaView>
   );
 }
