@@ -7,6 +7,8 @@ export const useSettings = create(
     minColumns: 1,
     maxColumns: 6,
 
+    // columns: 3,
+
     albumColumns: 3,
     albumLayoutType: "grid" as LayoutType,
 
