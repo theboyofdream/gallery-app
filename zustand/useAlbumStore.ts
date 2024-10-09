@@ -14,33 +14,58 @@ async function updateAlbumDetails(album: Album | AlbumDetails) {
   }
 
   let asset = await getAssetsAsync(params)
+  let itemIds = [] as string[]
   let items = {} as Record<string, AlbumItem>
 
-  const { items: albumItems, setAlbumItems, setAlbumDetails } = useAlbumStore.getState()
+  const { items: albumItems, removeAlbum, setAlbumItems, setAlbumDetails } = useAlbumStore.getState()
 
-  asset.assets.map(asset => {
-    if (albumItems[asset.id]) {
-      items[asset.id] = {
-        ...albumItems[asset.id],
-        ...asset,
-        // selected: albumItems[asset.id].selected
+  for (let file of asset.assets) {
+    // if (useFilters.getState().mediaType.includes(file.mediaType)) {
+    if (file.mediaType === "photo") {
+      if (albumItems[file.id]) {
+        items[file.id] = {
+          ...albumItems[file.id],
+          ...asset,
+          // selected: albumItems[asset.id].selected
+        }
+      } else {
+        items[file.id] = file
       }
-    } else {
-      items[asset.id] = {
-        ...asset,
-        // selected: false
-      }
+      itemIds.push(file.id)
     }
-  })
+  }
+
+  if (itemIds.length < 1) {
+    removeAlbum(album)
+    return
+  }
 
   setAlbumDetails({
     ...album,
-    items: [],
-    thumbnail: asset.assets[0],
+    items: itemIds,
+    thumbnail: items[itemIds[0]],
+    assetCount: itemIds.length,
     // selected: false
   })
 
   setAlbumItems(items)
+}
+
+async function updateAlbumThumbnail(album: Album | AlbumDetails) {
+  const { assets } = await getAssetsAsync({
+    first: 1,
+    album: album,
+    sortBy: useFilters.getState().sortBy,
+    mediaType: useFilters.getState().mediaType
+  })
+
+
+  // useAlbumStore.getState().setAlbumDetails({
+  //   ...album,
+
+  // })
+
+  return assets.length > 0 ? assets[0] : null
 }
 
 export const useAlbumStore = create(
@@ -48,7 +73,7 @@ export const useAlbumStore = create(
     {
       albumIds: [] as string[],
       activeAlbumId: "",
-      albums: {} as Record<string, CustomAlbum>,
+      albums: {} as Record<string, AlbumDetails>,
       activeAlbumItemId: "",
       activeAlbumItemIndex: 0,
       items: {} as Record<string, AlbumItem>,
@@ -60,12 +85,28 @@ export const useAlbumStore = create(
         let albums = await getAlbumsAsync({ includeSmartAlbums: false })
         let albumIds = [] as string[]
 
-        albums.map(album => {
+        for (let album of albums) {
           if (album.assetCount > 0) {
-            albumIds.push(album.id)
-            updateAlbumDetails(album)
+            const thumbnail = await updateAlbumThumbnail(album)
+            if (thumbnail) {
+              set({
+                albums: {
+                  ...get().albums,
+                  [album.id]: {
+                    ...album,
+                    thumbnail,
+                    items: []
+                  }
+                }
+              })
+              updateAlbumDetails(album)
+              albumIds.push(album.id)
+            }
           }
-        })
+        }
+
+        // albums.map(album => {
+        // })
 
         set({ albumIds })
       },
@@ -89,6 +130,12 @@ export const useAlbumStore = create(
               ...album,
             }
           }
+        })
+      },
+
+      removeAlbum(album: Album | AlbumDetails) {
+        set({
+          albumIds: get().albumIds.filter(id => id !== album.id)
         })
       },
 

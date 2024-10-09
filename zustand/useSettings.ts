@@ -10,8 +10,8 @@ export const useSettings = create(
     albumColumns: 3,
     albumLayoutType: "grid" as LayoutType,
 
-    itemColumns: 3,
-    itemLayoutType: "grid" as LayoutType,
+    albumItemColumns: 3,
+    albumItemLayoutType: "grid" as LayoutType,
 
     theme: "system" as AppTheme,
 
@@ -22,19 +22,19 @@ export const useSettings = create(
         if (type === "album") {
           set({ albumColumns: count })
         } else if (type === "item") {
-          set({ itemColumns: count })
+          set({ albumItemColumns: count })
         }
       }
     },
 
     adjustColumns(by: 1 | -1, type: "album" | "item") {
-      const { albumColumns, itemColumns } = get()
+      const { albumColumns, albumItemColumns: itemColumns } = get()
       const count = (type === "album" ? albumColumns : itemColumns) + by
       if (count >= get().minColumns && count <= get().maxColumns) {
         if (type === "album") {
           set({ albumColumns: count })
         } else if (type === "item") {
-          set({ itemColumns: count })
+          set({ albumItemColumns: count })
         }
       }
     },

@@ -1,186 +1,256 @@
-import { useTokens } from "@/hooks";
-import { useAlbums } from "@/hooks/useAlbums";
-import { useColumns } from "@/hooks/useColumns";
-import { FlashList, MasonryFlashList } from "@shopify/flash-list";
-import { ChevronLeft } from "@tamagui/lucide-icons";
+import { useAlbumStore, useSettings } from "@/zustand";
+import { FlashList } from "@shopify/flash-list";
+import { ChevronLeft, LayoutGrid } from "@tamagui/lucide-icons";
+import { Image, ImageContentFit } from "expo-image";
 import { useGlobalSearchParams, useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { FlatList, Image, RefreshControl, TouchableOpacity, useWindowDimensions } from "react-native";
-import { Button, Text, XStack, YStack } from "tamagui";
-import { useInfiniteQuery, useQuery } from "react-query";
-import { useAlbumStore } from "@/zustand/useAlbumStore";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { FlatList, TouchableOpacity, useWindowDimensions } from "react-native";
+import { Button, getTokens, Text, useTheme, View, XStack, YStack, ZStack } from "tamagui";
+import { format } from "date-fns/format"
+import { BlurView } from "expo-blur"
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function FilePage() {
+  const [] = useState(0)
+
+  const router = useRouter()
   const { width, height } = useWindowDimensions()
+
   const { albumId } = useGlobalSearchParams()
   const { fileIndex } = useLocalSearchParams();
 
-  const { space, radius } = useTokens();
+  const { albumItemColumns } = useSettings()
+  const footerImageEstimatedSize = Math.max(width / (albumItemColumns * 2), 60)
+  const { activeAlbumId, albums, items } = useAlbumStore()
+  const album =
+    albumId ?
+      albums[albumId as string] :
+      albums[activeAlbumId];
 
-  const { activeAlbum, setActiveFileIndex } = useAlbumStore()
+  const [activeIndex, setActiveIndex] = useState(Number(fileIndex) ?? 0)
+  const activeFile = useMemo(() => {
+    return items[album.items[activeIndex]]
+  }, [activeIndex, album, items])
 
-  const ref = useRef<FlatList>(null)
+  const ref = useRef<FlashList<string>>(null)
+  const footerListref = useRef<FlashList<string>>(null)
 
-  // useEffect
+  const theme = useTheme()
+  const { size } = getTokens();
 
   return (
-    <YStack flex={1}>
-      {/* <Text>File Page</Text>
-      <Text>{albumId}</Text>
-      <Text>{fileIndex}</Text>
-      <Text>{file?.filename}</Text> */}
-      <FlatList
-        getItemLayout={(data, index) => {
-          // console.debug({ data, index })
-          // setActiveFileIndex(index)
+    <View style={{
+      flex: 1,
+      // height: "100%",
+      // flexDirection: "column"
+    }}>
 
-          return {
-            length: width,
-            offset: width * index,
-            index: index
-          }
+      <XStack
+        alignItems="center"
+        gap="$1"
+        backgroundColor={"$background075"}
+        padding="$0.5"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          zIndex: 99,
+          width: "100%",
         }}
-        onViewableItemsChanged={({ viewableItems }) => {
-          if (viewableItems.length > 0) {
-            const newIndex = viewableItems[0].index ?? 0;
-            setActiveFileIndex(newIndex);
-          }
-        }}
-        ref={ref}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        pagingEnabled
-        initialScrollIndex={Number(fileIndex) ?? 0}
-        initialNumToRender={3}
-        data={activeAlbum?.items}
-        renderItem={({ item }) => {
-          return (
-            <TouchableOpacity
-              activeOpacity={0.9}
-              style={{
-                width,
-                height,
-                padding: space.$2.val,
+      >
+        <Button
+          aspectRatio={1}
+          icon={ChevronLeft}
+          onPress={router.back}
+          padding={0}
+          scaleIcon={2}
+          borderRadius={"$12"}
+          backgroundColor={"$colorTransparent"}
+        />
+        <YStack my="$1">
+          <Text fontSize={"$5"}>{activeFile.filename}</Text>
+          <Text opacity={0.5} fontSize={"$1"}>
+            {
+              activeFile.modificationTime &&
+              format(new Date(activeFile.modificationTime), "dd MMM y hh:mm a")
+            }
+          </Text>
+        </YStack>
+      </XStack>
+
+      <View style={{ flex: 1 }}>
+        <FlashList
+          ref={ref}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          pagingEnabled
+          // getItemLayout={(_, index) => ({
+          //   length: width,
+          //   offset: width * index,
+          //   index,
+          // })}
+          // extraData={[activeIndex, album, items]}
+          initialScrollIndex={Number(fileIndex) ?? 0}
+          // maxToRenderPerBatch={1}
+          estimatedItemSize={width}
+          onMomentumScrollEnd={(event) => {
+            const index = Math.round(event.nativeEvent.contentOffset.x / width)
+            setActiveIndex(index)
+            footerListref.current?.scrollToIndex({
+              index,
+              animated: true,
+              viewOffset: (width / 2) - (footerImageEstimatedSize / 2),
+            })
+          }}
+          data={album.items}
+          renderItem={({ item: id }) => (
+            <File
+              id={id}
+              width={width}
+              height={height}
+              onPress={() => {
+                console.log("pressed")
               }}
-            >
-              <Image
-                source={{ uri: item.uri }}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "contain",
-                  // borderRadius: radius.$2.val,
-                }}
-              />
-            </TouchableOpacity>
-          );
+            />
+          )}
+        />
+      </View>
+
+      <View
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          width,
+          // backgroundColor: theme.background025.val,
+          // paddingVertical: size["$0.5"].val,
+          zIndex: 99,
+          flexDirection: "row",
+          alignItems: "center"
         }}
-      />
-    </YStack>
+        paddingVertical={"$0.5"}
+        marginBottom={"$2"}
+      >
+
+        <LinearGradient
+          colors={[theme.background.val, "#ffffff00"]}
+          locations={[0, 1]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={{
+            position: "absolute",
+            left: 0,
+            zIndex: 109,
+            height: footerImageEstimatedSize,
+            width: size["$1.5"].val,
+          }}
+        />
+        <View style={{ flex: 1 }}>
+          <FlashList
+            ref={footerListref}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={album.items}
+            estimatedItemSize={footerImageEstimatedSize}
+            renderItem={({ item: id, index }) => (
+              <View
+                borderRadius="$6"
+                overflow={"hidden"}
+                marginHorizontal={"$2"}
+              >
+                <File
+                  id={id}
+                  width={footerImageEstimatedSize}
+                  height={footerImageEstimatedSize}
+                  contentFit="cover"
+                  onPress={() => {
+                    setActiveIndex(index)
+                    ref.current?.scrollToIndex({
+                      index,
+                      animated: true,
+                    })
+                  }}
+                />
+              </View>
+            )}
+            ListHeaderComponent={<View style={{ width: size["$1.5"].val }} />}
+            ListFooterComponent={<View style={{ width: footerImageEstimatedSize }} />}
+          />
+        </View>
+
+        <LinearGradient
+          colors={["#ffffff00", theme.background075.val, theme.background.val]}
+          locations={[0, 0.2, 0.3]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={{
+            position: "absolute",
+            right: 0,
+          }}
+        >
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={{
+              height: footerImageEstimatedSize,
+              paddingHorizontal: size['$0.75'].val,
+              paddingLeft: size['$1'].val,
+              // aspectRatio: 1,
+              justifyContent: "center",
+            }}
+          >
+            <YStack
+              alignItems="center"
+            >
+              <LayoutGrid size={size["$2"].val} />
+              <Text fontSize={"$1"}>Menu</Text>
+            </YStack>
+          </TouchableOpacity>
+        </LinearGradient>
+
+      </View>
+    </View>
   )
-
-  // const fileIndex = params?.fileIndex ?? 0;
-
-  // const { getAlbumById } = useAlbums();
-
-  // const {
-  //   data: album,
-  //   isLoading,
-  //   refetch,
-  // } = useQuery({
-  //   queryKey: fileId,
-  //   enabled: !!fileId,
-  //   queryFn: async () => await getAlbumById(fileId as string),
-  // });
-
-  // //   const [album, setAlbum] = useState(null);
-
-  // //   const album = await getAlbumById(albumId as string);
-  // //   useMemo(() => {}, [albumId]);
-
-  // //   console.debug({ album });
-
-  // const { columns, columnWidth } = useColumns();
-
-  // const { theme, space } = useTokens();
-  // const router = useRouter();
-
-  // //   if (album) {
-  // return (
-  //   <YStack flex={1}>
-  //     <MasonryFlashList
-  //       refreshing={isLoading}
-  //       refreshControl={
-  //         <RefreshControl refreshing={isLoading} onRefresh={refetch} />
-  //       }
-  //       //   data={album.assets}
-  //       data={album?.items.assets}
-  //       numColumns={columns}
-  //       estimatedItemSize={columnWidth}
-  //       ListHeaderComponent={
-  //         <XStack alignItems="center" gap="$2">
-  //           <Button
-  //             aspectRatio={1}
-  //             icon={ChevronLeft}
-  //             onPress={router.back}
-  //             // size={"$3"}
-  //             // height={"unset"}
-  //             padding={0}
-  //             scaleIcon={2}
-  //             borderRadius={"$12"}
-  //           />
-  //           <YStack my="$4" pl="$2">
-  //             <Text fontSize={"$7"}>{album?.title}</Text>
-  //             <Text opacity={0.5} fontSize={"$1"}>
-  //               {/* {album.assets.length} items */}
-  //               {album?.assetCount} items
-  //             </Text>
-  //           </YStack>
-  //         </XStack>
-  //       }
-  //       renderItem={({ item }) => {
-  //         return (
-  //           <TouchableOpacity
-  //             activeOpacity={0.9}
-  //             style={{
-  //               width: "100%",
-  //               //   padding: space["$2"].val,
-  //               padding: space["$0.5"].val,
-  //             }}
-  //           // onPress={() => {
-  //           //   router.push(`album/${item.id}`);
-  //           // }}
-  //           >
-  //             <Image
-  //               //   source={{ uri: item.uri }}
-  //               source={{ uri: item.uri }}
-  //               style={{
-  //                 width: "100%",
-  //                 aspectRatio: 1,
-  //                 // aspectRatio: item.width / item.height,
-  //                 resizeMode: "cover",
-  //                 // borderRadius: radius.$6.val,
-  //                 overflow: "hidden",
-  //               }}
-  //             />
-  //             {/* <Text fontSize={"$3"} opacity={0.5} paddingLeft="$2">
-  //                   {item.filename}
-  //                 </Text> */}
-  //             {/* <YStack paddingLeft="$1">
-  //                   <Text fontSize={"$3"} opacity={0.5} paddingLeft="$1">
-  //                     {item.filename}
-  //                   </Text>
-  //                   <Text fontSize={"$3"} opacity={0.5}>
-  //                     {item.filename}
-  //                   </Text>
-  //                 </YStack> */}
-  //           </TouchableOpacity>
-  //         );
-  //       }}
-  //     />
-  //   </YStack>
-  // );
-  //   }
-  //   return null;
-  //   return <Text>{album?.id}</Text>;
 }
+
+interface FileProps {
+  id: string;
+  width: number;
+  height: number;
+  contentFit?: ImageContentFit;
+  onPress?: () => void;
+}
+const File = memo(({
+  id,
+  width,
+  height,
+  contentFit = "contain",
+  onPress
+}: FileProps) => {
+  const space = getTokens().space;
+  const { items } = useAlbumStore()
+  const item = items[id]
+
+  // console.log(item.uri);
+
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.9}
+      style={{
+        width,
+        height,
+        // padding: space.$2.val,
+      }}
+      onPress={onPress}
+    >
+      <Image
+        source={{ uri: item.uri }}
+        style={{
+          width: "100%",
+          height: "100%",
+        }}
+        contentFit={contentFit}
+      />
+    </TouchableOpacity>
+  );
+})

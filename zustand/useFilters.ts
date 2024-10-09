@@ -5,7 +5,7 @@ const INITIAL_STATE = {
   startDate: null as Date | null,
   endDate: null as Date | null,
   sortBy: ["modificationTime"] as SortBy,
-  mediaType: ["photo", "video"] as MediaType,
+  mediaType: ["photo"] as MediaType,
 } as const
 
 export const useFilters = create(
