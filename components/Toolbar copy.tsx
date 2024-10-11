@@ -1,11 +1,10 @@
 import { useSettings } from "@/zustand";
 import { IconProps } from "@expo/vector-icons/build/createIconSet";
-import { AlignStartHorizontal, CheckCheck, Copy, Filter, Grid, Grid3x3, LayoutDashboard, LayoutGrid, Move, Image as ImageIcon, Check as CheckIcon, Settings, Settings2, Share2, Trash2, Wand2, X, Video, ArrowBigUpDash, ArrowBigDownDash, RefreshCw, SwatchBook, Sun, MoonStar, LogOut, ChevronDown, Info, ExternalLink, ArrowUpRight, CircleDollarSign, Palette, CalendarClock, CupSoda, Pizza, Soup, Cookie, Hand, Coins, ArrowRight, Link, Share, Github, Twitter } from "@tamagui/lucide-icons";
+import { AlignStartHorizontal, CheckCheck, Copy, Filter, Grid, Grid3x3, LayoutDashboard, LayoutGrid, Move, Image as ImageIcon, Check as CheckIcon, Settings, Settings2, Share2, Trash2, Wand2, X, Video, ArrowBigUpDash, ArrowBigDownDash, RefreshCw, SwatchBook, Sun, MoonStar, LogOut, ChevronDown, Info, ExternalLink, ArrowUpRight, CircleDollarSign, Palette, CalendarClock, CupSoda, Pizza, Soup, Cookie, Hand, Coins, ArrowRight } from "@tamagui/lucide-icons";
 import { BlurView } from "expo-blur";
-import { Image } from "expo-image";
 import { Slot } from "expo-router";
 import { ReactNode, useState } from "react";
-import { Linking, Pressable, StatusBar, TextInput, TouchableOpacity, useWindowDimensions } from "react-native";
+import { Pressable, StatusBar, TouchableOpacity, useWindowDimensions } from "react-native";
 import Animated from "react-native-reanimated";
 import { G } from "react-native-svg";
 import { View, Text, useTheme, XStack, YStack, getTokens, ScrollView, Button, SizableText, Separator, Group, CheckboxProps, Checkbox, Label, Progress, Slider, Header, H1, Accordion, Paragraph, Square, Input, InputFrame, Avatar } from "tamagui";
@@ -85,17 +84,15 @@ export function Toolbar({
           userSelect: "none",
           width: opened ? "96%" : undefined,
           maxWidth: opened ? "96%" : "80%",
-          height: "auto",
           maxHeight: "96%",
           alignSelf: "center",
           // flexDirection: "row",
           // justifyContent: "center",
           // alignItems: "center",
-          // overflow: "hidden",
-          // overflow: "scroll",
+          overflow: "hidden",
         }}
         p="$1"
-        px="$3"
+        px="$2"
         borderRadius={"$9"}
         margin="$2"
         marginBottom="$3"
@@ -103,30 +100,35 @@ export function Toolbar({
         borderWidth={"$0.5"}
         borderColor={"$borderColor"}
       >
-
-        {/* <FilterView /> */}
-        {/* <LayoutView /> */}
-        {/* <SettingsView /> */}
-
-        {/* <View> */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          padding="$1"
+        <View
+          p="$2.5"
+          gap="$2"
         >
-          {
-            Object.keys(items).map((key) => (
-              <ToolBarButton
-                key={key}
-                type={key as ToolbarItemType}
-                iconColor={items[key as ToolbarItemType]?.iconColor}
-                textColor={items[key as ToolbarItemType]?.textColor}
-                onPress={items[key as ToolbarItemType]?.onPress}
-              />
-            ))
-          }
-        </ScrollView>
-        {/* </View> */}
+
+          {/* <FilterView /> */}
+          {/* <LayoutView /> */}
+          <SettingsView />
+
+        </View>
+
+        <View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          >
+            {
+              Object.keys(items).map((key) => (
+                <ToolBarButton
+                  key={key}
+                  type={key as ToolbarItemType}
+                  iconColor={items[key as ToolbarItemType]?.iconColor}
+                  textColor={items[key as ToolbarItemType]?.textColor}
+                  onPress={items[key as ToolbarItemType]?.onPress}
+                />
+              ))
+            }
+          </ScrollView>
+        </View>
       </View>
     </AnimatedPressable>
   )
@@ -515,13 +517,13 @@ const DonationAmounts = [
 
 function SettingsView() {
 
-  const tamaguitheme = useTheme()
-  const { space, size } = getTokens()
   const { albumItemColumns, updateColumns, maxColumns, minColumns, theme, setTheme } = useSettings()
   const [opendAccordion, setOpendAccordion] = useState<'license' | 'terms-and-conditions' | 'privacy-policy' | 'about-us' | ''>('')
 
   return (
-    <>
+
+    <View gap="$4" zIndex={100}>
+
       <XStack justifyContent="space-between">
         <XStack alignItems="center" gap="$2">
           <Settings size={"$1"} />
@@ -538,8 +540,8 @@ function SettingsView() {
 
 
       <ScrollView
-        nestedScrollEnabled
-        showsVerticalScrollIndicator={false}
+        maxHeight={"100%"}
+        scrollEnabled
         contentContainerStyle={{
           gap: "$4"
         }}
@@ -569,7 +571,7 @@ function SettingsView() {
           </Button>
         </XStack>
 
-        <YStack gap="$2" pt="$1">
+        <YStack gap="$2" mt="$3">
           <Text fontSize={"$5"}>Select Theme</Text>
           <XStack gap="$2">
             {
@@ -580,12 +582,14 @@ function SettingsView() {
                     backgroundColor={value === theme ? "$blue10" : undefined}
                     color={value === theme ? "white" : undefined}
                     borderRadius={"$7"}
+                    // gap="$1"
                     padding="$3"
                     flex={1}
                     justifyContent="flex-start"
                     alignItems="flex-start"
                     flexDirection="column"
                     height={"auto"}
+                    // fontSize={"$5"}
                     icon={Icon}
                     scaleIcon={1.5}
                     textProps={{
@@ -603,108 +607,9 @@ function SettingsView() {
           </XStack>
         </YStack>
 
-
-        <YStack gap="$2" pt="$1">
-          <Text fontSize={"$5"}>Share with a friend</Text>
-          <XStack gap="$2">
-            <Image
-              source={{ uri: 'https://picsum.photos/200/300?random=1' }}
-              style={{
-                // height: 100,
-                aspectRatio: 1,
-                borderRadius: space["$4.5"].val,
-                flex: 1,
-              }}
-            />
-            <XStack
-              flex={1}
-              gap="$2"
-              flexWrap="wrap"
-            >
-              {
-                [
-                  {
-                    label: 'copy',
-                    icon: Link,
-                    url: 'https://picsum.photos/200/300?random=1'
-                  },
-                  {
-                    label: 'share',
-                    icon: Share,
-                    url: 'https://picsum.photos/200/300?random=1'
-                  },
-                  {
-                    label: 'star',
-                    icon: Github,
-                    url: 'https://picsum.photos/200/300?random=1'
-                  },
-                  {
-                    label: 'follow',
-                    icon: Twitter,
-                    url: 'https://picsum.photos/200/30'
-                  }
-                ].map(({ label, icon, url }) => (
-                  <Button
-                    key={label}
-                    // backgroundColor={value === theme ? "$blue10" : undefined}
-                    // color={value === theme ? "white" : undefined}
-                    borderRadius={"$7"}
-                    padding="$3"
-                    // flex={1}
-                    style={{
-                      minWidth: "23%"
-                    }}
-                    justifyContent="flex-start"
-                    alignItems="flex-start"
-                    flexDirection="column"
-                    height={"auto"}
-                    icon={icon}
-                    scaleIcon={1.5}
-                    textProps={{
-                      textTransform: "capitalize"
-                    }}
-                    onPress={() => {
-                      Linking.openURL(url)
-                      // setTheme(value)
-                    }}
-                  >
-                    {label}
-                  </Button>
-                ))
-              }
-            </XStack>
-            {/* {
-              (Themes).map(({ label, value, icon: Icon }) => {
-                return (
-                  <Button
-                    key={value}
-                    backgroundColor={value === theme ? "$blue10" : undefined}
-                    color={value === theme ? "white" : undefined}
-                    borderRadius={"$7"}
-                    padding="$3"
-                    flex={1}
-                    justifyContent="flex-start"
-                    alignItems="flex-start"
-                    flexDirection="column"
-                    height={"auto"}
-                    icon={Icon}
-                    scaleIcon={1.5}
-                    textProps={{
-                      textTransform: "capitalize"
-                    }}
-                    onPress={() => setTheme(value)}
-                  >
-                    {label}
-                  </Button>
-                )
-              })
-            } */}
-
-
-          </XStack>
-        </YStack>
-
-        <YStack gap="$2" pt="$1">
+        {/* <Text fontSize={"$6"} fontWeight={"bold"}>Support development with Donation</Text> */}
+        {/* <Text fontSize={"$5"}>Support development with Donation</Text> */}
+        <YStack gap="$2" mt="$3">
           <Text fontSize={"$5"}>Donations</Text>
           <Text>Select Type</Text>
           <XStack gap="$2">
@@ -716,12 +621,14 @@ function SettingsView() {
                     // backgroundColor={item === theme ? "$blue10" : undefined}
                     // color={item === theme ? "white" : undefined}
                     borderRadius={"$7"}
+                    // gap="$1"
                     padding="$3"
                     flex={1}
                     justifyContent="flex-start"
                     alignItems="flex-start"
                     flexDirection="column"
                     height={"auto"}
+                    // fontSize={"$6"}
                     icon={item.icon}
                     scaleIcon={1.5}
                     textProps={{
@@ -745,13 +652,16 @@ function SettingsView() {
                     // backgroundColor={item === theme ? "$blue10" : undefined}
                     // color={item === theme ? "white" : undefined}
                     borderRadius={"$7"}
+                    // gap="$1"
                     padding="$3"
+                    // flex={1}
                     flexGrow={1}
                     minWidth={"$10"}
                     justifyContent="flex-start"
                     alignItems="flex-start"
                     flexDirection="column"
                     height={"auto"}
+                    // fontSize={"$6"}
                     icon={item.icon}
                     scaleIcon={1.5}
                     textProps={{
@@ -770,25 +680,17 @@ function SettingsView() {
               })
             }
           </XStack>
-
           <XStack
             // borderRadius={"$7"}
             // borderColor={"$borderColor"}
             // borderWidth={"$0.5"}
             gap="$2"
-          // backgroundColor={'$color4'}
           >
-            <TextInput
+            <Input
+              borderRadius={"$6"}
+              // borderWidth={"$0"}
               placeholder="Custom amount (from $1)"
-              // showSoftInputOnFocus
-              // autoFocus
-              cursorColor={tamaguitheme.color.val}
-              style={{
-                flex: 1,
-                paddingHorizontal: space.$3.val,
-                backgroundColor: tamaguitheme.color4.val,
-                borderRadius: space.$4.val,
-              }}
+              flex={1}
             />
             <Button
               icon={ArrowRight}
@@ -801,7 +703,7 @@ function SettingsView() {
           </XStack>
         </YStack>
 
-        <YStack gap="$2" pt="$2">
+        <YStack gap="$2" mt="$3">
           {
             [
               {
@@ -844,9 +746,7 @@ function SettingsView() {
         <Text textAlign="center" opacity={0.5}>Version: 1.0.0</Text>
       </ScrollView>
 
-      <XStack
-        pt="$1.5"
-        alignItems="center" justifyContent="flex-end">
+      <XStack alignItems="center" justifyContent="flex-end">
         {/* <XStack alignItems="center" gap="$2">
           <AlignStartHorizontal size={"$1"} />
           <Text>Layout</Text>
@@ -885,7 +785,7 @@ function SettingsView() {
         </XStack>
       </XStack>
 
-    </>
+    </View>
   )
 }
 

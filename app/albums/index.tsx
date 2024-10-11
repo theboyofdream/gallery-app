@@ -9,7 +9,7 @@ import { memo, useMemo } from "react";
 import { RefreshControl, TouchableOpacity, useWindowDimensions } from "react-native";
 import Animated from "react-native-reanimated";
 import { useQuery } from "react-query";
-import { getTokens, ScrollView, Text, YStack } from "tamagui";
+import { getTokens, ScrollView, Text, View, YStack } from "tamagui";
 
 
 const blurhash =
@@ -37,7 +37,7 @@ export default function AlbumsPage() {
   })
 
   return (
-    <YStack gap="$2" flex={1}>
+    <View gap="$2" flex={1}>
       <MasonryFlashList
         refreshing={isLoading}
         refreshControl={
@@ -65,12 +65,11 @@ export default function AlbumsPage() {
       <Toolbar
         items={{
           "filter": {},
-          // "layout": {},
           "settings": {},
         }}
         visible
       />
-    </YStack >
+    </View>
   );
 }
 

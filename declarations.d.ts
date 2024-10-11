@@ -23,5 +23,7 @@ declare global {
 
   type SortBy = SortByValue | SortByValue[];
 
+  type SortingOrder = "asc" | "desc";
+
   type MediaType = MediaTypeValue | MediaTypeValue[];
 }

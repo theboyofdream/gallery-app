@@ -13,7 +13,7 @@ export default function NotFoundScreen() {
       }}
     >
       <Text>Error</Text>
-      <Link href={"/"}>Go to home</Link>
+      <Link href={"/splashscreen"}>Go to home</Link>
     </YStack>
   );
 }

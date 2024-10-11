@@ -7,8 +7,6 @@ import { View, Text, useTheme, XStack, YStack, getTokens, Button, ScrollView, Si
 
 export default function AlbumsLayout() {
   return (
-    <>
-      <Slot />
-    </>
+    <Slot />
   );
 }

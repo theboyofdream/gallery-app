@@ -39,6 +39,16 @@ export const useSettings = create(
       }
     },
 
+    updateColumns(count: number, type: "album" | "item") {
+      if (count >= get().minColumns && count <= get().maxColumns) {
+        if (type === "album") {
+          set({ albumColumns: count })
+        } else if (type === "item") {
+          set({ albumItemColumns: count })
+        }
+      }
+    },
+
     setTheme(theme: AppTheme) {
       set({ theme })
     }
