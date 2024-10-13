@@ -1,32 +1,35 @@
-import { Link, Stack } from "expo-router";
-import { StyleSheet } from "react-native";
+import SplashScreen from "./splashscreen";
+export default SplashScreen
 
-import { Text, YStack } from "tamagui";
+// import { Link, Stack } from "expo-router";
+// import { StyleSheet } from "react-native";
 
-export default function NotFoundScreen() {
-  return (
-    <YStack
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Error</Text>
-      <Link href={"/splashscreen"}>Go to home</Link>
-    </YStack>
-  );
-}
+// import { Text, YStack } from "tamagui";
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
-  },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
-  },
-});
+// export default function NotFoundScreen() {
+//   return (
+//     <YStack
+//       style={{
+//         flex: 1,
+//         justifyContent: "center",
+//         alignItems: "center",
+//       }}
+//     >
+//       <Text>Error</Text>
+//       <Link href={"/splashscreen"}>Go to home</Link>
+//     </YStack>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     alignItems: "center",
+//     justifyContent: "center",
+//     padding: 20,
+//   },
+//   link: {
+//     marginTop: 15,
+//     paddingVertical: 15,
+//   },
+// });

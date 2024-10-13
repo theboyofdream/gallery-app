@@ -8,13 +8,37 @@ export const useSelectStore = create(
     },
     (set, get) => ({
       addOrRemoveSelectedAlbumItem(albumId: string, itemId: string) {
-        const selectedAlbumItems = get().selectedAlbumItems
+        let selectedAlbumItems = { ...get().selectedAlbumItems }
 
         if (!selectedAlbumItems[albumId]) {
-          selectedAlbumItems[albumId] = [itemId]
-        } else if (selectedAlbumItems[albumId].includes(itemId)) {
-          selectedAlbumItems[albumId] = selectedAlbumItems[albumId].filter(id => id !== itemId)
+          selectedAlbumItems[albumId] = []
         }
+
+        if (selectedAlbumItems[albumId].includes(itemId)) {
+          selectedAlbumItems[albumId] = selectedAlbumItems[albumId].filter(id => id !== itemId)
+        } else {
+          selectedAlbumItems[albumId].push(itemId)
+        }
+
+        // if (!selectedAlbumItems[albumId]) {
+        //   selectedAlbumItems[albumId] = [itemId]
+        // } else if (selectedAlbumItems[albumId].includes(itemId)) {
+        //   selectedAlbumItems[albumId] = selectedAlbumItems[albumId].filter(id => id !== itemId)
+        // }else if()
+        // console.log(selectedAlbumItems)
+        set({ selectedAlbumItems })
+      },
+
+      emptySelectedAlbumItems(albumId: string) {
+        let selectedAlbumItems = { ...get().selectedAlbumItems }
+
+        if (!selectedAlbumItems[albumId]) {
+          return
+        }
+
+        selectedAlbumItems[albumId] = []
+
+        set({ selectedAlbumItems })
       }
     })
   )

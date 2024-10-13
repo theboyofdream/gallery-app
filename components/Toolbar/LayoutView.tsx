@@ -1,21 +1,50 @@
 import { useSettings } from "@/zustand"
-import { LayoutDashboard, LayoutGrid } from "@tamagui/lucide-icons"
+import { AlignHorizontalJustifyStart, AlignStartHorizontal, LayoutDashboard, LayoutGrid } from "@tamagui/lucide-icons"
 import { useState } from "react"
 import { Button, Slider, Text, View, XStack, YStack } from "tamagui"
+import { ToolbarOptionHeader } from "./ToolbarOptionHeader"
+import { ToolbarOptionFooter } from "./ToolbarOptionFooter"
 
+interface LayoutViewProps {
+  close: () => void
+}
 
-export function LayoutView() {
+export function LayoutView(
+  { close }: LayoutViewProps
+) {
 
-  const [layoutType, setLayoutType] = useState<'grid' | 'masnory'>("grid")
-  const [sortingOrder, setSortingOrder] = useState<SortingOrder>("asc")
-  const [sortBy, setSortBy] = useState<SortBy>("modificationTime")
+  const { albumItemColumns, albumItemLayoutType, updateColumns, resetStore, updateLayoutType, maxColumns, minColumns } = useSettings()
+
+  const [layoutType, setLayoutType] = useState<LayoutType>(albumItemLayoutType)
+  const [columns, setColumns] = useState(albumItemColumns)
   // const showMediaTypeBtnBgClr = showMediaType === "all" ? "$blue10" : undefined
 
-  const { albumItemColumns, updateColumns, maxColumns, minColumns } = useSettings()
+
+  function applyChanges() {
+    updateColumns(columns, 'item')
+    updateLayoutType(layoutType, 'item')
+    close()
+  }
+
+  function clearChanges() {
+    setLayoutType(albumItemLayoutType)
+    setColumns(albumItemColumns)
+    // close()
+  }
 
   return (
     <>
-      <View gap="$4" zIndex={100}>
+
+      <ToolbarOptionHeader
+        icon={AlignStartHorizontal}
+        title={'Layout'}
+        onReset={() => {
+          resetStore(['albumItemLayoutType', 'albumItemColumns'])
+          clearChanges()
+        }}
+      />
+
+      <View gap="$4" zIndex={100} px="$3">
 
         <YStack gap="$2">
           <Text>Select Layout Type</Text>
@@ -39,8 +68,8 @@ export function LayoutView() {
               Grid
             </Button>
             <Button
-              backgroundColor={layoutType === "masnory" ? "$blue10" : undefined}
-              color={layoutType === "masnory" ? "white" : undefined}
+              backgroundColor={layoutType === 'masonry' ? "$blue10" : undefined}
+              color={layoutType === 'masonry' ? "white" : undefined}
               borderRadius={"$7"}
               // gap="$1"
               padding="$3"
@@ -52,7 +81,7 @@ export function LayoutView() {
               fontSize={"$6"}
               icon={LayoutDashboard}
               scaleIcon={2}
-              onPress={() => setLayoutType("masnory")}
+              onPress={() => setLayoutType('masonry')}
             >
               Masnory
             </Button>
@@ -65,14 +94,15 @@ export function LayoutView() {
         <YStack gap="$2"
         // px="$2"
         >
-          <Text>Number of Columns: {albumItemColumns}</Text>
+          <Text>Number of Columns: {columns}</Text>
           <Slider
-            defaultValue={[albumItemColumns]}
+            // defaultValue={[columns]}
+            value={[columns]}
             min={minColumns}
             max={maxColumns}
             step={1}
             onValueChange={(value) => {
-              updateColumns(value[0], "item")
+              setColumns(value[0])
             }}
           >
             <Slider.Track>
@@ -91,6 +121,12 @@ export function LayoutView() {
           </Slider>
         </YStack>
       </View>
+
+      <ToolbarOptionFooter
+        onApply={applyChanges}
+        onClear={clearChanges}
+        onCancel={close}
+      />
     </>
   )
 }

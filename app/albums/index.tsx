@@ -1,11 +1,11 @@
 import { Toolbar } from "@/components/Toolbar";
 import { useColumns } from "@/hooks/useColumns";
-import { useSettings } from "@/zustand";
+import { useFilters, useSettings } from "@/zustand";
 import { useAlbumStore } from "@/zustand/useAlbumStore";
 import { MasonryFlashList } from "@shopify/flash-list";
 import { Image } from 'expo-image';
 import { useRouter } from "expo-router";
-import { memo, useMemo } from "react";
+import { memo, useEffect, useMemo } from "react";
 import { RefreshControl, TouchableOpacity, useWindowDimensions } from "react-native";
 import Animated from "react-native-reanimated";
 import { useQuery } from "react-query";
@@ -26,6 +26,7 @@ export default function AlbumsPage() {
     return albumIds
   }, [albumIds])
 
+
   const { albumColumns } = useSettings()
   const { width } = useWindowDimensions()
   const estimatedItemSize = width / albumColumns
@@ -35,6 +36,11 @@ export default function AlbumsPage() {
     enabled: false,
     queryFn: findAlbums
   })
+
+  // const filters = useFilters()
+  // useEffect(() => {
+  //   refetch()
+  // }, [filters])
 
   return (
     <View gap="$2" flex={1}>

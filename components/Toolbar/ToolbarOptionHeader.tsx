@@ -23,6 +23,7 @@ export function ToolbarOptionHeader(
       <Button
         height="unset"
         backgroundColor={"transparent"}
+        borderRadius={"$12"}
         opacity={0.5}
         icon={RefreshCw}
         onPress={onReset}

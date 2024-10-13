@@ -1,35 +1,90 @@
 import { ArrowBigDownDash, ArrowBigUpDash, Filter, Image, Video } from "@tamagui/lucide-icons"
 import { Button, Group, Text, View, XStack, YStack } from "tamagui"
 import { CheckboxWithLabel } from "../CheckboxWithLabel"
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { useFilters, useSettings } from "@/zustand"
+import { ToolbarOptionHeader } from "./ToolbarOptionHeader"
+import { ToolbarOptionFooter } from "./ToolbarOptionFooter"
 
-export
-  function FilterView() {
+interface FilterViewProps {
+  close: () => void
+}
 
-  const [showMediaType, setShowMediaType] = useState<MediaType | "all">("all")
-  const [sortingOrder, setSortingOrder] = useState<SortingOrder>("asc")
-  const [sortBy, setSortBy] = useState<SortBy>("modificationTime")
-  // const showMediaTypeBtnBgClr = showMediaType === "all" ? "$blue10" : undefined
+export function FilterView(
+  {
+    close
+  }: FilterViewProps
+) {
+
+  const filters = useFilters()
+
+  const [mediaType, setMediaType] = useState<MediaType>(filters.mediaType)
+  const showMediaType = useMemo(() => {
+    if (mediaType.length === 1) {
+      return mediaType[0]
+    }
+    if (mediaType.length === 2) {
+      return 'all'
+    }
+  }, [mediaType])
+
+  const [sortingOrder, setSortingOrder] = useState<SortingOrder>(filters.sortingOrder)
+  const [sortBy, setSortBy] = useState<SortBy>(filters.sortBy)
+
+  function applyChanges() {
+    filters.updateFilters({
+      mediaType: mediaType,
+      sortBy,
+      sortingOrder
+    })
+    close()
+  }
+
+  function clearChanges() {
+    setMediaType(filters.mediaType)
+    setSortingOrder(filters.sortingOrder)
+    setSortBy(filters.sortBy)
+    // close()
+  }
 
   return (
     <>
 
-      <YStack gap="$2">
+      <ToolbarOptionHeader
+        icon={Filter}
+        title={'Filter'}
+        onReset={() => {
+          filters.clearFilter()
+          clearChanges()
+        }}
+      />
+
+      <YStack gap="$2" px="$1.5">
         <Text pl="$2">Show</Text>
         <Group orientation="horizontal" borderRadius={"$12"}>
           <Group.Item>
             <Button
               size={'$3.5'}
-              onPress={() => setShowMediaType("all")}
-              backgroundColor={showMediaType === "all" ? "$blue10" : undefined}
-              color={showMediaType === "all" ? "white" : undefined}
+              onPress={() => {
+                setMediaType(['photo', 'video'])
+              }}
+              backgroundColor={
+                showMediaType === 'all' ?
+                  "$blue10" :
+                  undefined
+              }
+              color={
+                showMediaType === 'all' ?
+                  "white" :
+                  undefined
+              }
               flex={1}
             >All</Button>
           </Group.Item>
           <Group.Item>
             <Button
               size={'$3.5'}
-              onPress={() => setShowMediaType("photo")}
+              onPress={() => setMediaType(["photo"])}
               backgroundColor={showMediaType === "photo" ? "$blue10" : undefined}
               color={showMediaType === "photo" ? "white" : undefined}
               icon={Image}
@@ -40,7 +95,7 @@ export
           <Group.Item>
             <Button
               size={'$3.5'}
-              onPress={() => setShowMediaType("video")}
+              onPress={() => setMediaType(["video"])}
               backgroundColor={showMediaType === "video" ? "$blue10" : undefined}
               color={showMediaType === "video" ? "white" : undefined}
               icon={Video}
@@ -51,7 +106,7 @@ export
         </Group>
       </YStack>
 
-      <YStack gap="$2">
+      <YStack gap="$2" px="$1.5">
         <Text pl="$2">Sorting order</Text>
         <Group orientation="horizontal" borderRadius={"$12"}>
           <Group.Item>
@@ -79,7 +134,7 @@ export
         </Group>
       </YStack>
 
-      <YStack gap="$2">
+      <YStack gap="$2" px="$1.5">
         <Text pl="$2">Sort By</Text>
         <YStack gap="$2">
           <CheckboxWithLabel
@@ -110,6 +165,11 @@ export
         </YStack>
       </YStack>
 
+      <ToolbarOptionFooter
+        onApply={applyChanges}
+        onClear={clearChanges}
+        onCancel={close}
+      />
     </>
   )
 }

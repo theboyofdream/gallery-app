@@ -8,7 +8,7 @@ export default function SplashScreen() {
 
   const { hasPermission } = useAlbums()
 
-  const [redirectingIn, setRedirectingIn] = useState(5)
+  const [redirectingIn, setRedirectingIn] = useState(3)
   let interval: NodeJS.Timer | null = null
 
   useEffect(() => {

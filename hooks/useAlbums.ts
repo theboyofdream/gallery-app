@@ -1,3 +1,4 @@
+import { useFilters, useSettings } from "@/zustand";
 import {
   usePermissions,
   Asset,
@@ -27,8 +28,8 @@ export function useAlbums() {
         const asset = await getAssetsAsync({
           first: 1,
           album: album,
-          sortBy: "modificationTime",
-          mediaType: "photo",
+          sortBy: useFilters.getState().sortBy,
+          mediaType: useFilters.getState().mediaType,
         });
         if (asset.assets.length > 0) {
           customAlbums.push({
@@ -56,8 +57,8 @@ export function useAlbums() {
         const asset = await getAssetsAsync({
           first: album.assetCount,
           album: album,
-          sortBy: "modificationTime",
-          mediaType: "photo",
+          sortBy: useFilters.getState().sortBy,
+          mediaType: useFilters.getState().mediaType,
         });
         return {
           ...album,

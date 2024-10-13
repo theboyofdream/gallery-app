@@ -1,21 +1,23 @@
 import { create } from "zustand";
 import { combine } from "zustand/middleware";
 
+const INITIAL_STATE = {
+  defaultColumns: 3,
+  minColumns: 1,
+  maxColumns: 6,
+
+  albumColumns: 3,
+  albumLayoutType: "grid" as LayoutType,
+
+  albumItemColumns: 3,
+  albumItemLayoutType: "grid" as LayoutType,
+
+  theme: "system" as AppTheme,
+
+}
+
 export const useSettings = create(
-  combine({
-    defaultColumns: 3,
-    minColumns: 1,
-    maxColumns: 6,
-
-    albumColumns: 3,
-    albumLayoutType: "grid" as LayoutType,
-
-    albumItemColumns: 3,
-    albumItemLayoutType: "grid" as LayoutType,
-
-    theme: "system" as AppTheme,
-
-  }, (set, get) => ({
+  combine(INITIAL_STATE, (set, get) => ({
 
     setColumn(count: number, type: "album" | "item") {
       if (count >= get().minColumns && count <= get().maxColumns) {
@@ -49,8 +51,24 @@ export const useSettings = create(
       }
     },
 
+    updateLayoutType(layout: LayoutType, type: "album" | 'item') {
+      if (type === 'album') {
+        set({ albumLayoutType: layout })
+      } else if (type === 'item') {
+        set({ albumItemLayoutType: layout })
+      }
+    },
+
     setTheme(theme: AppTheme) {
       set({ theme })
+    },
+
+    resetStore(keys: Array<keyof typeof INITIAL_STATE>) {
+      let state = { ...get() }
+      keys.map(key => {
+        state[key] = INITIAL_STATE[key]
+      })
+      set({ ...state })
     }
   })
   ))

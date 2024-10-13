@@ -1,17 +1,47 @@
-import { useAlbumStore, useSettings } from "@/zustand";
+import { AppHeader } from "@/components/AppHeader";
+import { Checkbox } from "@/components/Checkbox";
+import AwesomeGallery, { GalleryRef } from "@/components/react-native-awesome-gallery";
+import { ToolBarButton } from "@/components/Toolbar";
+import { useAlbumStore, useSelectStore, useSettings } from "@/zustand";
 import { FlashList } from "@shopify/flash-list";
-import { ChevronLeft, LayoutGrid } from "@tamagui/lucide-icons";
+import { format } from "date-fns/format";
 import { Image, ImageContentFit } from "expo-image";
-import { useGlobalSearchParams, useLocalSearchParams, useRouter } from "expo-router";
+import { useGlobalSearchParams, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
-import { FlatList, TouchableOpacity, useWindowDimensions } from "react-native";
-import { Button, getTokens, Text, useTheme, View, XStack, YStack, ZStack } from "tamagui";
-import { format } from "date-fns/format"
-import { BlurView } from "expo-blur"
-import { LinearGradient } from "expo-linear-gradient";
+import { FlatList, Linking, TouchableOpacity, useWindowDimensions } from "react-native";
+import { getTokens, useTheme, View, XStack, ZStack } from "tamagui";
+import { create } from "zustand";
+import { combine } from "zustand/middleware";
+import * as ExpoIntentLauncher from 'expo-intent-launcher';
+// import RNShare from "react-native-share";
+
+
+let overlayTimer: NodeJS.Timeout | null = null;
+
+const useFilePageState = create(
+  combine(
+    {
+      overlayVisible: true
+    },
+    (set, get) => ({
+      toggleOverlayVisibility() {
+        const overlayVisible = get().overlayVisible
+
+        set({ overlayVisible: !overlayVisible })
+
+        // overlayTimer && clearTimeout(overlayTimer)
+        // if (!overlayVisible) {
+        //   overlayTimer = setTimeout(() => {
+        //     set({ overlayVisible: false })
+        //   }, 3000);
+        // }
+      }
+    })
+  )
+)
 
 export default function FilePage() {
-  const [] = useState(0)
+  const [] = useState(2)
 
   const router = useRouter()
   const { width, height } = useWindowDimensions()
@@ -34,67 +64,120 @@ export default function FilePage() {
 
   const ref = useRef<FlashList<string>>(null)
   const footerListref = useRef<FlashList<string>>(null)
+  // const footerListref = useRef<FlatList<string>>(null)
 
   const theme = useTheme()
   const { size } = getTokens();
 
-  return (
-    <View style={{
-      flex: 1,
-      // height: "100%",
-      // flexDirection: "column"
-    }}>
+  const { overlayVisible, toggleOverlayVisibility } = useFilePageState()
 
-      <XStack
-        alignItems="center"
-        gap="$1"
-        backgroundColor={"$background075"}
-        padding="$0.5"
-        style={{
+  const mainImageListRef = useRef<GalleryRef>(null)
+
+  const { selectedAlbumItems, addOrRemoveSelectedAlbumItem, emptySelectedAlbumItems } = useSelectStore()
+  const selectionOn = selectedAlbumItems[album.id]?.length > 0
+  const selectedItems = selectedAlbumItems[album.id] ?? []
+  console.log(selectedAlbumItems)
+
+  // Navigation
+  const navigation = useNavigation();
+
+  // Effect
+  useEffect(() => {
+    // setTimeout(() => {
+    //   footerListref.current?.scrollToIndex({
+    //     index: activeIndex,
+    //     animated: true,
+    //     viewOffset: (width / 2) - (footerImageEstimatedSize / 2),
+    //   })
+    // }, 1000);
+
+    const backListener = (e) => {
+      e.preventDefault();
+      console.log('onback');
+      // if (selectionOn) {
+      // }
+      emptySelectedAlbumItems(album.id)
+      // Do your stuff here
+      navigation.dispatch(e.data.action);
+    }
+
+    navigation.addListener('beforeRemove', backListener);
+
+    return () => {
+      navigation.removeListener('beforeRemove', backListener)
+    }
+  }, []);
+
+  const { space } = getTokens()
+
+  function onshareclick() {
+
+
+    // Share.share({
+    //   url:
+    // })
+    // Sharing.shareAsync({
+    //   message: 'Check out these awesome images!',
+    //   files: imagesToShare,
+    //   title: 'Share Images',
+    // })
+  }
+
+  return (
+    <View style={{ flex: 1 }}>
+
+      <View style={[
+        {
           position: "absolute",
           top: 0,
           left: 0,
-          zIndex: 99,
-          width: "100%",
-        }}
-      >
-        <Button
-          aspectRatio={1}
-          icon={ChevronLeft}
-          onPress={router.back}
-          padding={0}
-          scaleIcon={2}
-          borderRadius={"$12"}
-          backgroundColor={"$colorTransparent"}
-        />
-        <YStack my="$1">
-          <Text fontSize={"$5"}>{activeFile.filename}</Text>
-          <Text opacity={0.5} fontSize={"$1"}>
-            {
-              activeFile.modificationTime &&
-              format(new Date(activeFile.modificationTime), "dd MMM y hh:mm a")
+          width,
+          zIndex: 99
+        },
+        !overlayVisible && {
+          opacity: 0,
+          pointerEvents: 'none'
+        }
+      ]}>
+        <AppHeader
+          title={
+            selectionOn ?
+              `${selectedItems.length.toString().padStart(2, '0')} item${selectedItems.length === 1 ? "" : "s"} selected` :
+              activeFile.filename
+          }
+          subTitle={
+            !selectionOn &&
+              activeFile.modificationTime ?
+              format(new Date(activeFile.modificationTime), "dd MMM y hh:mm a") ?? "" :
+              ""
+          }
+          type={selectionOn ? 'cancel' : 'back'}
+          onCancel={() => {
+            if (selectionOn) {
+              emptySelectedAlbumItems(album.id)
             }
-          </Text>
-        </YStack>
-      </XStack>
+            // router.back()
+          }}
+        />
+      </View>
 
       <View style={{ flex: 1 }}>
-        <FlashList
-          ref={ref}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          pagingEnabled
-          // getItemLayout={(_, index) => ({
-          //   length: width,
-          //   offset: width * index,
-          //   index,
-          // })}
-          // extraData={[activeIndex, album, items]}
-          initialScrollIndex={Number(fileIndex) ?? 0}
-          // maxToRenderPerBatch={1}
-          estimatedItemSize={width}
-          onMomentumScrollEnd={(event) => {
-            const index = Math.round(event.nativeEvent.contentOffset.x / width)
+        <AwesomeGallery
+          ref={mainImageListRef}
+          style={{ flex: 1 }}
+          data={album.items}
+          initialIndex={Number(fileIndex) ?? 0}
+          numToRender={3}
+          // disableVerticalSwipe
+          disableSwipeUp
+          // hideAdjacentImagesOnScaledImage
+          onTap={toggleOverlayVisibility}
+          onSwipeToClose={() => {
+            // console.log('clsoe')
+            router.back()
+          }}
+
+          onIndexChange={(index) => {
             setActiveIndex(index)
             footerListref.current?.scrollToIndex({
               index,
@@ -102,111 +185,175 @@ export default function FilePage() {
               viewOffset: (width / 2) - (footerImageEstimatedSize / 2),
             })
           }}
-          data={album.items}
-          renderItem={({ item: id }) => (
-            <File
-              id={id}
-              width={width}
-              height={height}
-              onPress={() => {
-                console.log("pressed")
-              }}
-            />
-          )}
+
+          renderItem={({ item: id, setImageDimensions }) => {
+            setImageDimensions({
+              width,
+              height
+            })
+            return (
+              <File
+                id={id}
+                width={width}
+                height={height}
+              // onPress={() => {
+              //   toggleOverlayVisibility()
+              //   // console.log("file pressed")
+              // }}
+              />
+            )
+          }}
         />
       </View>
 
+
       <View
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          width,
-          // backgroundColor: theme.background025.val,
-          // paddingVertical: size["$0.5"].val,
-          zIndex: 99,
-          flexDirection: "row",
-          alignItems: "center"
-        }}
-        paddingVertical={"$0.5"}
-        marginBottom={"$2"}
+        style={
+          [{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            width,
+            // backgroundColor: theme.background025.val,
+            // paddingVertical: size["$0.5"].val,
+            zIndex: 99,
+            // flexDirection: "row",
+            alignItems: "center"
+          },
+          !overlayVisible && {
+            opacity: 0,
+            pointerEvents: 'none'
+          }
+          ]}
+        // paddingVertical={"$0.5"}
+        // paddingBottom={"$2"}
+        gap="$2"
       >
 
-        <LinearGradient
-          colors={[theme.background.val, "#ffffff00"]}
-          locations={[0, 1]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={{
-            position: "absolute",
-            left: 0,
-            zIndex: 109,
-            height: footerImageEstimatedSize,
-            width: size["$1.5"].val,
-          }}
-        />
         <View style={{ flex: 1 }}>
+          {/* <FlatList */}
           <FlashList
             ref={footerListref}
             horizontal
             showsHorizontalScrollIndicator={false}
             data={album.items}
+            // getItemLayout={(data, index) => ({
+            //   // length: data?.length ?? 0,
+            //   length: footerImageEstimatedSize,
+            //   // offset: (footerImageEstimatedSize * index),
+            //   offset: footerImageEstimatedSize * index + (width / 2) - (footerImageEstimatedSize),
+            //   // offset: (footerImageEstimatedSize * (index + 1)) + space["$1.5"].val * 3,
+            //   index,
+            // })}
+            initialScrollIndex={selectionOn ? undefined : (Number(activeIndex) ?? 0)}
+            extraData={[selectionOn, selectedItems]}
             estimatedItemSize={footerImageEstimatedSize}
-            renderItem={({ item: id, index }) => (
-              <View
-                borderRadius="$6"
-                overflow={"hidden"}
-                marginHorizontal={"$2"}
-              >
-                <File
-                  id={id}
+            renderItem={({ item: id, index }) => {
+              return (
+                <ZStack
+                  borderRadius="$6"
+                  overflow={"hidden"}
+                  marginHorizontal={"$1.5"}
                   width={footerImageEstimatedSize}
                   height={footerImageEstimatedSize}
-                  contentFit="cover"
-                  onPress={() => {
-                    setActiveIndex(index)
-                    ref.current?.scrollToIndex({
-                      index,
-                      animated: true,
-                    })
-                  }}
-                />
-              </View>
-            )}
+                >
+                  <File
+                    id={id}
+                    width={footerImageEstimatedSize}
+                    height={footerImageEstimatedSize}
+                    contentFit="cover"
+                    onPress={() => {
+                      setActiveIndex(index)
+                      mainImageListRef.current?.setIndex(index, true)
+                    }}
+                    onLongPress={() => {
+                      // console.log('longpress')
+                      addOrRemoveSelectedAlbumItem(album.id, id)
+                    }}
+                  />
+
+                  {
+                    selectionOn &&
+                    <XStack>
+                      <XStack
+                        padding="$2"
+                      >
+
+                        <Checkbox
+                          checked={selectedItems.includes(id)}
+                          onCheckedChange={_ => {
+                            console.log(_)
+                            addOrRemoveSelectedAlbumItem(album.id, id)
+                          }}
+                        />
+                      </XStack>
+                    </XStack>
+
+                  }
+                </ZStack>
+              )
+            }}
             ListHeaderComponent={<View style={{ width: size["$1.5"].val }} />}
-            ListFooterComponent={<View style={{ width: footerImageEstimatedSize }} />}
+            ListFooterComponent={<View style={{ width: size['$1.5'].val }} />}
           />
         </View>
 
-        <LinearGradient
-          colors={["#ffffff00", theme.background075.val, theme.background.val]}
-          locations={[0, 0.2, 0.3]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={{
-            position: "absolute",
-            right: 0,
-          }}
+        <XStack
+          backgroundColor={"$background075"}
         >
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={{
-              height: footerImageEstimatedSize,
-              paddingHorizontal: size['$0.75'].val,
-              paddingLeft: size['$1'].val,
-              // aspectRatio: 1,
-              justifyContent: "center",
+          <ToolBarButton
+            type="copy"
+            style={{ flex: 1 }}
+          />
+          <ToolBarButton
+            type="move"
+            style={{ flex: 1 }}
+          />
+          <ToolBarButton
+            type="delete"
+            style={{ flex: 1 }}
+          />
+          <ToolBarButton
+            type="share"
+            style={{ flex: 1 }}
+            disabled
+            onPress={() => {
+              // RNShare.open({
+              //   title: "Share files",
+              //   message: "Share files",
+              //   urls: [activeFile.uri, activeFile.uri]
+              // })
+              // ExpoIntentLauncher.startActivityAsync()
+              // Share.open({
+              //   title: "Share files"
+              // })
+              // ShareIntent.shareIntent.files
+              // ExpoSharing.shareAsync(
+              //   activeFile.uri,
+              // )
             }}
-          >
-            <YStack
-              alignItems="center"
-            >
-              <LayoutGrid size={size["$2"].val} />
-              <Text fontSize={"$1"}>Menu</Text>
-            </YStack>
-          </TouchableOpacity>
-        </LinearGradient>
-
+          />
+          {
+            selectionOn ?
+              <>
+                {/* <ToolBarButton
+                  type="selectAll"
+                  style={{ flex: 1 }}
+                /> */}
+                <ToolBarButton
+                  type="close"
+                  style={{ flex: 1 }}
+                  onPress={() => emptySelectedAlbumItems(album.id)}
+                />
+              </> :
+              <>
+                <ToolBarButton
+                  type="info"
+                  style={{ flex: 1 }}
+                />
+              </>
+          }
+        </XStack>
       </View>
     </View>
   )
@@ -218,30 +365,28 @@ interface FileProps {
   height: number;
   contentFit?: ImageContentFit;
   onPress?: () => void;
+  onLongPress?: () => void
 }
 const File = memo(({
   id,
   width,
   height,
   contentFit = "contain",
-  onPress
+  onPress,
+  onLongPress
 }: FileProps) => {
-  const space = getTokens().space;
   const { items } = useAlbumStore()
   const item = items[id]
 
-  // console.log(item.uri);
-
-
   return (
     <TouchableOpacity
-      activeOpacity={0.9}
+      activeOpacity={1}
       style={{
         width,
         height,
-        // padding: space.$2.val,
       }}
       onPress={onPress}
+      onLongPress={onLongPress}
     >
       <Image
         source={{ uri: item.uri }}
@@ -254,3 +399,65 @@ const File = memo(({
     </TouchableOpacity>
   );
 })
+
+
+interface FooterFileProps {
+  fileId: string
+  index: number
+  onPress: () => void
+}
+function FooterFile(
+  {
+    fileId,
+    index,
+    onPress
+  }: FooterFileProps
+) {
+  const { width } = useWindowDimensions()
+  const { albumItemColumns } = useSettings()
+  const footerImageEstimatedSize = Math.max(width / (albumItemColumns * 2), 60)
+
+  return (
+    <ZStack
+      borderRadius="$6"
+      overflow={"hidden"}
+      marginHorizontal={"$1.5"}
+      width={footerImageEstimatedSize}
+      height={footerImageEstimatedSize}
+    >
+      <File
+        id={fileId}
+        width={footerImageEstimatedSize}
+        height={footerImageEstimatedSize}
+        contentFit="cover"
+        onPress={() => {
+          setActiveIndex(index)
+          mainImageListRef.current?.setIndex(index, true)
+        }}
+        onLongPress={() => {
+          // console.log('longpress')
+          addOrRemoveSelectedAlbumItem(album.id, id)
+        }}
+      />
+
+      {
+        selectionOn &&
+        <XStack>
+          <XStack
+            padding="$2"
+          >
+
+            <Checkbox
+              checked={selectedItems.includes(id)}
+              onCheckedChange={_ => {
+                console.log(_)
+                addOrRemoveSelectedAlbumItem(album.id, id)
+              }}
+            />
+          </XStack>
+        </XStack>
+
+      }
+    </ZStack>
+  )
+}

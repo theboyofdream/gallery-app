@@ -1,11 +1,11 @@
 import { useSettings } from "@/zustand";
 import { IconProps } from "@expo/vector-icons/build/createIconSet";
-import { AlignStartHorizontal, CheckCheck, Copy, Filter, Grid, Grid3x3, LayoutDashboard, LayoutGrid, Move, Image as ImageIcon, Check as CheckIcon, Settings, Settings2, Share2, Trash2, Wand2, X, Video, ArrowBigUpDash, ArrowBigDownDash, RefreshCw, SwatchBook, Sun, MoonStar, LogOut, ChevronDown, Info, ExternalLink, ArrowUpRight, CircleDollarSign, Palette, CalendarClock, CupSoda, Pizza, Soup, Cookie, Hand, Coins, ArrowRight, Link, Share, Github, Twitter } from "@tamagui/lucide-icons";
+import { AlignStartHorizontal, CheckCheck, Copy, Filter, Grid, Grid3x3, LayoutDashboard, LayoutGrid, Move, Image as ImageIcon, Check as CheckIcon, Settings, Settings2, Share2, Trash2, Wand2, X, Video, ArrowBigUpDash, ArrowBigDownDash, RefreshCw, SwatchBook, Sun, MoonStar, LogOut, ChevronDown, Info, ExternalLink, ArrowUpRight, CircleDollarSign, Palette, CalendarClock, CupSoda, Pizza, Soup, Cookie, Hand, Coins, ArrowRight, Link, Share, Github, Twitter, Trash } from "@tamagui/lucide-icons";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
-import { Slot } from "expo-router";
+import { Slot, useRouter } from "expo-router";
 import { ReactNode, useCallback, useState } from "react";
-import { Linking, Pressable, StatusBar, TextInput, TouchableOpacity, useWindowDimensions } from "react-native";
+import { Linking, Pressable, StatusBar, TextInput, TouchableOpacity, useWindowDimensions, ViewStyle } from "react-native";
 import Animated from "react-native-reanimated";
 import { G } from "react-native-svg";
 import { View, Text, useTheme, XStack, YStack, getTokens, ScrollView, Button, SizableText, Separator, Group, CheckboxProps, Checkbox, Label, Progress, Slider, Header, H1, Accordion, Paragraph, Square, Input, InputFrame, Avatar } from "tamagui";
@@ -29,6 +29,7 @@ const ToolbarItems = [
   'layout',
   'close',
   'organise',
+  'info'
 ] as const
 type ToolbarItemType = typeof ToolbarItems[number];
 
@@ -50,13 +51,15 @@ export function Toolbar({
   visible,
 }: ToolbarProps) {
   // const theme = useTheme()
+  const router = useRouter()
+  const gotoSettings = () => router.push('/albums/settings')
 
   // console.log(theme.background.get())
   const [activeOption, setActiveOption] = useState<'organise' | 'filter' | 'layout' | 'settings' | null>(null)
   const [opened, setOpened] = useState(false)
 
   const theme = useTheme()
-  const overlayColor = theme.color05.get()
+  const overlayColor = theme.color1.get()
 
 
   function onToolbarOptionPress(option: typeof activeOption) {
@@ -81,7 +84,7 @@ export function Toolbar({
 
           <StatusBar
             translucent
-            backgroundColor={overlayColor}
+            backgroundColor={theme.background05.val}
           />
 
           <Pressable
@@ -92,7 +95,7 @@ export function Toolbar({
               left: 0,
               width: "100%",
               height: "100%",
-              backgroundColor: overlayColor,
+              backgroundColor: theme.background05.val,
               zIndex: 100,
             }}
           />
@@ -128,21 +131,22 @@ export function Toolbar({
         {
           opened && activeOption !== 'organise' &&
           <>
-            <ToolbarOptionHeader
+            {/* <ToolbarOptionHeader
               icon={ToolbarIcons[activeOption ?? "layout"]}
               title={activeOption ?? ""}
-            />
+            /> */}
 
-            <YStack px="$1.5">
-              {activeOption === 'filter' && <FilterView />}
-              {activeOption === 'layout' && <LayoutView />}
-              {activeOption === 'settings' && <SettingsView />}
+            <YStack gap="$3">
+              {activeOption === 'filter' && <FilterView close={onToolbarOptionClose} />}
+              {activeOption === 'layout' && <LayoutView close={onToolbarOptionClose} />}
+              {/* {activeOption === 'settings' && <SettingsView />} */}
             </YStack>
 
-            <ToolbarOptionFooter
+            {/* <ToolbarOptionFooter
               onApply={() => { }}
               onClear={() => { }}
-            />
+              onCancel={onToolbarOptionClose}
+            /> */}
           </>
         }
 
@@ -174,6 +178,7 @@ export function Toolbar({
               />
               <ToolBarButton
                 type={"share"}
+                disabled
               />
             </>
           }
@@ -186,9 +191,19 @@ export function Toolbar({
                 type={key as ToolbarItemType}
                 iconColor={items[key as ToolbarItemType]?.iconColor}
                 textColor={items[key as ToolbarItemType]?.textColor}
+                disabled={key == 'share'}
+                // disabled
                 onPress={() => {
                   onToolbarOptionPress(key as typeof activeOption)
-                  items[key as ToolbarItemType]?.onPress
+                  items[key as ToolbarItemType]?.onPress?.()
+                  if (key === 'settings') {
+                    gotoSettings()
+                    return
+                  }
+                  if (key === 'close') {
+                    onToolbarOptionClose()
+                    return
+                  }
                 }}
               />
             ))
@@ -206,12 +221,13 @@ const ToolbarIcons: {
   "copy": Copy,
   "move": Move,
   "selectAll": CheckCheck,
-  "delete": Trash2,
+  "delete": Trash,
   "settings": Settings,
   "filter": Filter,
   "share": Share,
   "layout": AlignStartHorizontal,
   "organise": Wand2,
+  'info': Info
 }
 
 interface ToolBarButtonProps {
@@ -220,20 +236,31 @@ interface ToolBarButtonProps {
   textColor?: string;
   text?: string;
   onPress?: () => void;
+  style?: ViewStyle
+  disabled?: boolean;
 }
 
-function ToolBarButton({
+export function ToolBarButton({
   type,
   iconColor,
   textColor,
   text,
   onPress = () => { },
+  disabled,
+  style
 }: ToolBarButtonProps) {
   const Icon = ToolbarIcons[type]
   return (
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={onPress}
+      disabled={disabled}
+      style={[
+        style,
+        disabled && {
+          opacity: 0.5,
+        }
+      ]}
     >
       <YStack
         alignItems="center"

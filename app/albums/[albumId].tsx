@@ -1,14 +1,17 @@
-import { useAlbumStore, useSettings } from "@/zustand";
+import { useAlbumStore, useSelectStore, useSettings } from "@/zustand";
 import { MasonryFlashList } from "@shopify/flash-list";
-import { ArrowLeft, ChevronLeft } from "@tamagui/lucide-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { memo, useMemo } from "react";
-import { Dimensions, TouchableOpacity } from "react-native";
-import { Button, getTokens, Text, XStack, YStack } from "tamagui";
+import { ArrowLeft, Check, ChevronLeft } from "@tamagui/lucide-icons";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { memo, useEffect, useMemo } from "react";
+import { Dimensions, Pressable, TouchableOpacity } from "react-native";
+import { Button, getTokens, Text, XStack, YStack, ZStack } from "tamagui";
 import { Image } from "expo-image";
 import { Toolbar } from "@/components/Toolbar";
 import { MotiView } from "moti"
 import { AnimatedExpoImage } from ".";
+import { AppHeader } from "@/components/AppHeader";
+import { Checkbox } from "@/components/Checkbox";
+
 
 export default function AlbumPage() {
   const router = useRouter();
@@ -27,25 +30,43 @@ export default function AlbumPage() {
     return albumItemLayoutType === "grid" ? Dimensions.get('screen').width / albumItemColumns : undefined;
   }, [albumItemLayoutType]);
 
+  const { selectedAlbumItems, addOrRemoveSelectedAlbumItem, emptySelectedAlbumItems } = useSelectStore()
+  const selectionOn = selectedAlbumItems[album.id]?.length > 0
+  const selectedItems = selectedAlbumItems[album.id] ?? []
+  // Navigation
+  const navigation = useNavigation();
+
+  // Effect
+  useEffect(() => {
+    navigation.addListener('beforeRemove', (e) => {
+      e.preventDefault();
+      // console.log('onback');
+      // if (selectionOn) {
+      //   // return;
+      // }
+      emptySelectedAlbumItems(album.id)
+      // Do your stuff here
+      navigation.dispatch(e.data.action);
+    });
+  }, []);
+
   return (
     <YStack flex={1}>
-      <XStack alignItems="center" gap="$1" paddingVertical="$0.5" backgroundColor={"$background075"}>
-        <Button
-          aspectRatio={1}
-          icon={ChevronLeft}
-          onPress={router.back}
-          padding={0}
-          scaleIcon={2}
-          borderRadius={"$12"}
-          backgroundColor={"$colorTransparent"}
-        />
-        <YStack my="$1">
-          <Text fontSize={"$5"}>{album?.title}</Text>
-          <Text opacity={0.5} fontSize={"$1"}>
-            {album?.assetCount} items
-          </Text>
-        </YStack>
-      </XStack>
+      <AppHeader
+        title={
+          selectionOn ?
+            `${selectedItems.length.toString().padStart(2, '0')} item${selectedItems.length === 1 ? "" : "s"} selected` :
+            album?.title
+        }
+        subTitle={selectionOn ? undefined : album?.assetCount.toString()}
+        type={selectionOn ? 'cancel' : 'back'}
+        onCancel={() => {
+          if (selectionOn) {
+            emptySelectedAlbumItems(album.id)
+          }
+        }}
+      />
+
       <MasonryFlashList
         // refreshing={isLoading}
         // refreshControl={
@@ -53,42 +74,108 @@ export default function AlbumPage() {
         // }
         data={album.items}
         numColumns={albumItemColumns}
+        extraData={[selectionOn, selectedItems]}
         estimatedItemSize={estimatedItemSize}
         keyExtractor={(item) => item}
-        // ListHeaderComponent={
-        //   <XStack alignItems="center" gap="$1" paddingVertical="$0.5" backgroundColor={"$background075"}>
-        //     <Button
-        //       aspectRatio={1}
-        //       icon={ChevronLeft}
-        //       onPress={router.back}
-        //       padding={0}
-        //       scaleIcon={2}
-        //       borderRadius={"$12"}
-        //       backgroundColor={"$colorTransparent"}
-        //     />
-        //     <YStack my="$1">
-        //       <Text fontSize={"$5"}>{album?.title}</Text>
-        //       <Text opacity={0.5} fontSize={"$1"}>
-        //         {album?.assetCount} items
-        //       </Text>
-        //     </YStack>
-        //   </XStack>
-        // }
         renderItem={({ item: id, index }) => (
-          <AlbumItem
-            albumId={album.id}
-            id={id}
-            index={index}
-          />
+          <YStack position="relative">
+            <AlbumItem
+              albumId={album.id}
+              id={id}
+              index={index}
+              onPress={() => {
+                if (selectionOn) {
+                  addOrRemoveSelectedAlbumItem(album.id, id)
+                  // emptySelectedAlbumItems(album.id)
+                } else {
+                  router.push({
+                    pathname: "/albums/[albumId]/[fileIndex]",
+                    params: {
+                      albumId: album.id,
+                      fileIndex: index,
+                    },
+                  })
+                }
+                // setActiveIndex(index)
+                // mainImageListRef.current?.setIndex(index, true)
+              }}
+              onLongPress={() => {
+                console.log('longpress')
+                addOrRemoveSelectedAlbumItem(album.id, id)
+              }}
+            />
+            {
+              selectionOn &&
+              <Pressable
+                onPress={() => {
+                  addOrRemoveSelectedAlbumItem(album.id, id)
+                }}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                }}
+              >
+                <XStack
+                  position="absolute"
+                  top={0}
+                  left={0}
+                  width={"100%"}
+                  height={"100%"}
+                  flex={1}
+                  // zIndex={999}
+                  // justifyContent="center"
+                  // alignItems="center"
+                  backgroundColor={"$background025"}
+                >
+                  {/* {
+                  // selectedItems.includes(id) &&
+                  <Check color={"$backkground"} />
+                } */}
+                  <XStack
+                    padding="$2"
+                  >
+
+                    <Checkbox
+                      checked={selectedItems.includes(id)}
+                      onCheckedChange={_ => {
+                        console.log(_)
+                        addOrRemoveSelectedAlbumItem(album.id, id)
+                      }}
+                    />
+                  </XStack>
+                </XStack>
+              </Pressable>
+
+            }
+          </YStack>
         )}
       />
       <Toolbar
-        items={{
-          "organise": {},
-          "filter": {},
-          "layout": {},
-          "settings": {},
-        }}
+        items={
+          selectionOn ? {
+            'close': {
+              onPress: () => {
+                emptySelectedAlbumItems(album.id)
+              },
+            },
+            'copy': {},
+            'move': {},
+            'selectAll': {},
+            'delete': {},
+            'share': {},
+          } : {
+            // "organise": {
+            //   onPress(){
+
+            //   }
+            // },
+            "filter": {},
+            "layout": {},
+            "settings": {},
+          }}
         visible
       />
     </YStack>
@@ -100,11 +187,15 @@ interface AlbumItemProps {
   albumId: string;
   id: string;
   index: number;
+  onPress?: () => void;
+  onLongPress?: () => void;
 }
 const AlbumItem = memo(({
   albumId,
   id,
   index,
+  onPress,
+  onLongPress,
 }: AlbumItemProps) => {
   const { albumItemLayoutType } = useSettings();
   const { items } = useAlbumStore();
@@ -122,15 +213,17 @@ const AlbumItem = memo(({
         width: "100%",
         padding: space["$0.5"].val,
       }}
-      onPress={() => {
-        router.push({
-          pathname: "/albums/[albumId]/[fileIndex]",
-          params: {
-            albumId: albumId,
-            fileIndex: index,
-          },
-        })
-      }}
+      onPress={onPress}
+      onLongPress={onLongPress}
+    // onPress={() => {
+    //   router.push({
+    //     pathname: "/albums/[albumId]/[fileIndex]",
+    //     params: {
+    //       albumId: albumId,
+    //       fileIndex: index,
+    //     },
+    //   })
+    // }}
     >
       <AnimatedExpoImage
         // sharedTransitionTag={`album-${item.id}`}
@@ -144,17 +237,7 @@ const AlbumItem = memo(({
         }}
         contentFit="cover"
       />
-      {/* <Text fontSize={"$3"} opacity={0.5} paddingLeft="$2">
-                    {item.filename}
-                  </Text> */}
-      {/* <YStack paddingLeft="$1">
-                    <Text fontSize={"$3"} opacity={0.5} paddingLeft="$1">
-                      {item.filename}
-                    </Text>
-                    <Text fontSize={"$3"} opacity={0.5}>
-                      {item.filename}
-                    </Text>
-                  </YStack> */}
+
     </TouchableOpacity>
   );
 })

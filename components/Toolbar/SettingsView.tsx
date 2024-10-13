@@ -5,8 +5,6 @@ import { useState } from "react"
 import { Linking, TextInput, TouchableOpacity } from "react-native"
 import { useTheme, Button, ScrollView, View, getTokens, XStack, Avatar, YStack, Text } from "tamagui"
 
-
-
 const Themes = [
   {
     label: "System",
@@ -36,7 +34,7 @@ const DonationTypes = [
     // subLabel: 'via PayPal',
     icon: CalendarClock
   }
-]
+] as const
 const DonationAmounts = [
   {
     label: '$5',
@@ -78,7 +76,7 @@ const DonationAmounts = [
     amount: 1,
     icon: Coins
   },
-]
+] as const
 const ShareLinks = [
   {
     label: 'copy',
@@ -100,14 +98,39 @@ const ShareLinks = [
     icon: Twitter,
     url: 'https://picsum.photos/200/30'
   }
-]
+] as const
+const PoliciesLink = [
+  {
+    label: "License",
+    key: "license",
+    url: "https://github.com/sahil-saini/react-native-media-gallery/blob/main/LICENSE"
+  },
+  {
+    label: "Terms & Conditions",
+    key: "terms-and-conditions",
+    url: "https://github.com/sahil-saini/react-native-media-gallery/blob/main/LICENSE"
+  },
+  {
+    label: "Privacy Policy",
+    key: "privacy-policy",
+    url: "https://github.com/sahil-saini/react-native-media-gallery/blob/main/LICENSE"
+  },
+  {
+    label: "About Us",
+    key: "about-us",
+    url: "https://github",
+  }
+] as const
 
 export function SettingsView() {
 
-  const tamaguitheme = useTheme()
-  const { space, size } = getTokens()
-  const { albumItemColumns, updateColumns, maxColumns, minColumns, theme, setTheme } = useSettings()
-  const [opendAccordion, setOpendAccordion] = useState<'license' | 'terms-and-conditions' | 'privacy-policy' | 'about-us' | ''>('')
+  const theme = useTheme()
+  const { space } = getTokens()
+
+  const { theme: appTheme, setTheme: setAppTheme } = useSettings()
+
+  const [donationType, setDonationType] = useState<typeof DonationTypes[number]['label']>('One-time donation')
+  const [donationAmount, setDonationAmount] = useState<typeof DonationAmounts[number]['label']>('$5')
 
   return (
     <ScrollView
@@ -146,36 +169,32 @@ export function SettingsView() {
         <Text fontSize={"$5"}>Select Theme</Text>
         <XStack gap="$2">
           {
-            (Themes).map(({ label, value, icon: Icon }) => {
-              return (
-                <Button
-                  key={value}
-                  backgroundColor={value === theme ? "$blue10" : undefined}
-                  color={value === theme ? "white" : undefined}
-                  borderRadius={"$7"}
-                  padding="$3"
-                  flex={1}
-                  justifyContent="flex-start"
-                  alignItems="flex-start"
-                  flexDirection="column"
-                  height={"auto"}
-                  icon={Icon}
-                  scaleIcon={1.5}
-                  textProps={{
-                    textTransform: "capitalize"
-                  }}
-                  onPress={() => setTheme(value)}
-                >
-                  {label}
-                </Button>
-              )
-            })
+            Themes.map(({ label, value, icon: Icon }) => (
+              <Button
+                key={value}
+                backgroundColor={value === appTheme ? "$blue10" : undefined}
+                color={value === appTheme ? "white" : undefined}
+                borderRadius={"$7"}
+                padding="$3"
+                flex={1}
+                justifyContent="flex-start"
+                alignItems="flex-start"
+                flexDirection="column"
+                height={"auto"}
+                icon={Icon}
+                scaleIcon={1.5}
+                textProps={{
+                  textTransform: "capitalize"
+                }}
+                onPress={() => setAppTheme(value)}
+                children={label}
+              />
+            ))
           }
 
 
         </XStack>
       </YStack>
-
 
       <YStack gap="$2" pt="$1">
         <Text fontSize={"$5"}>Share with a friend</Text>
@@ -183,7 +202,6 @@ export function SettingsView() {
           <Image
             source={{ uri: 'https://picsum.photos/200/300?random=1' }}
             style={{
-              // height: 100,
               aspectRatio: 1,
               borderRadius: space["$4.5"].val,
               flex: 1,
@@ -198,11 +216,8 @@ export function SettingsView() {
               ShareLinks.map(({ label, icon: Icon, url }) => (
                 <Button
                   key={label}
-                  // backgroundColor={value === theme ? "$blue10" : undefined}
-                  // color={value === theme ? "white" : undefined}
                   borderRadius={"$7"}
                   padding="$3"
-                  // flex={1}
                   style={{
                     minWidth: "23%"
                   }}
@@ -217,11 +232,9 @@ export function SettingsView() {
                   }}
                   onPress={() => {
                     Linking.openURL(url)
-                    // setTheme(value)
                   }}
-                >
-                  {label}
-                </Button>
+                  children={label}
+                />
               ))
             }
           </XStack>
@@ -233,122 +246,106 @@ export function SettingsView() {
         <Text>Select Type</Text>
         <XStack gap="$2">
           {
-            DonationTypes.map((item) => {
-              return (
-                <Button
-                  key={item.label}
-                  // backgroundColor={item === theme ? "$blue10" : undefined}
-                  // color={item === theme ? "white" : undefined}
-                  borderRadius={"$7"}
-                  padding="$3"
-                  flex={1}
-                  justifyContent="flex-start"
-                  alignItems="flex-start"
-                  flexDirection="column"
-                  height={"auto"}
-                  icon={item.icon}
-                  scaleIcon={1.5}
-                  textProps={{
-                    textTransform: "capitalize"
-                  }}
-                // onPress={() => setTheme(item)}
-                >
-                  {item.label}
-                </Button>
-              )
-            })
+            DonationTypes.map(({ label, icon }) => (
+              <Button
+                key={label}
+                backgroundColor={label === donationType ? "$blue10" : undefined}
+                color={label === donationType ? "white" : undefined}
+                borderRadius={"$7"}
+                padding="$3"
+                flex={1}
+                justifyContent="flex-start"
+                alignItems="flex-start"
+                flexDirection="column"
+                height={"auto"}
+                icon={icon}
+                scaleIcon={1.5}
+                textProps={{
+                  textTransform: "capitalize"
+                }}
+                onPress={() => setDonationType(label)}
+                children={label}
+              />
+            ))
           }
         </XStack>
         <Text>Select Amount</Text>
         <XStack gap="$2" flexWrap="wrap">
           {
-            DonationAmounts.map((item) => {
-              return (
-                <Button
-                  key={item.amount}
-                  // backgroundColor={item === theme ? "$blue10" : undefined}
-                  // color={item === theme ? "white" : undefined}
-                  borderRadius={"$7"}
-                  padding="$3"
-                  flexGrow={1}
-                  minWidth={"$10"}
-                  justifyContent="flex-start"
-                  alignItems="flex-start"
-                  flexDirection="column"
-                  height={"auto"}
-                  icon={item.icon}
-                  scaleIcon={1.5}
-                  textProps={{
-                    textTransform: "capitalize"
-                  }}
-                // onPress={() => setTheme(item)}
-                >
-                  <YStack>
-                    <Text fontSize={"$6"}>
-                      {item.label}
-                    </Text>
-                    <Text>{item.subLabel}</Text>
-                  </YStack>
-                </Button>
-              )
-            })
+            DonationAmounts.map(({
+              amount,
+              icon,
+              label,
+              subLabel
+            }) => (
+              <Button
+                key={amount}
+                backgroundColor={
+                  label === donationAmount && label === "Custom" ?
+                    "$blue10" :
+                    undefined
+                }
+                color={
+                  label === donationAmount && label === "Custom" ?
+                    "white" :
+                    undefined
+                }
+                borderRadius={"$7"}
+                padding="$3"
+                flexGrow={1}
+                minWidth={"$10"}
+                justifyContent="flex-start"
+                alignItems="flex-start"
+                flexDirection="column"
+                height={"auto"}
+                icon={icon}
+                scaleIcon={1.5}
+                textProps={{
+                  textTransform: "capitalize"
+                }}
+                onPress={() => {
+                  setDonationAmount(label)
+                }}>
+                <YStack>
+                  <Text fontSize={"$6"}>
+                    {label}
+                  </Text>
+                  <Text>{subLabel}</Text>
+                </YStack>
+              </Button>
+            ))
           }
         </XStack>
 
-        <XStack
-          // borderRadius={"$7"}
-          // borderColor={"$borderColor"}
-          // borderWidth={"$0.5"}
-          gap="$2"
-        // backgroundColor={'$color4'}
-        >
-          <TextInput
-            placeholder="Custom amount (from $1)"
-            // showSoftInputOnFocus
-            // autoFocus
-            cursorColor={tamaguitheme.color.val}
-            style={{
-              flex: 1,
-              paddingHorizontal: space.$3.val,
-              backgroundColor: tamaguitheme.color4.val,
-              borderRadius: space.$4.val,
-            }}
-          />
-          <Button
-            icon={ArrowRight}
-            borderRadius={"$6"}
-            scaleIcon={1.5}
-            aspectRatio={1}
-          // borderTopLeftRadius={0}
-          // borderBottomLeftRadius={0}
-          />
-        </XStack>
+        {
+          donationAmount === "Custom" &&
+          <XStack gap="$2">
+            <TextInput
+              placeholder="Custom amount (from $1)"
+              placeholderTextColor={theme.color05.val}
+              cursorColor={theme.color.val}
+              autoFocus
+              style={{
+                flex: 1,
+                paddingHorizontal: space.$3.val,
+                backgroundColor: theme.color4.val,
+                borderRadius: space.$4.val,
+              }}
+            />
+            <Button
+              icon={ArrowRight}
+              borderRadius={"$6"}
+              scaleIcon={1.5}
+              aspectRatio={1}
+            />
+          </XStack>
+        }
+
       </YStack>
 
       <YStack gap="$2" pt="$2">
         {
-          [
-            {
-              label: "License",
-              key: "license",
-              url: "https://github.com/sahil-saini/react-native-media-gallery/blob/main/LICENSE"
-            },
-            {
-              label: "Terms & Conditions",
-              key: "terms-and-conditions",
-              url: "https://github.com/sahil-saini/react-native-media-gallery/blob/main/LICENSE"
-            },
-            {
-              label: "Privacy Policy",
-              key: "privacy-policy",
-              url: "https://github.com/sahil-saini/react-native-media-gallery/blob/main/LICENSE"
-            },
-            {
-              label: "About Us",
-              key: "about-us",
-              url: "https://github",
-            }
-          ].map(({ label, key, url }) => (
+          PoliciesLink.map(({ label, key, url }) => (
             <TouchableOpacity
               activeOpacity={0.8}
               key={key}
@@ -366,6 +363,7 @@ export function SettingsView() {
       </YStack>
 
       <Text textAlign="center" opacity={0.5}>Version: 1.0.0</Text>
+
     </ScrollView>
   )
 }
