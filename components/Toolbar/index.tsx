@@ -1,91 +1,92 @@
-import { useSettings } from "@/zustand";
-import { IconProps } from "@expo/vector-icons/build/createIconSet";
-import { AlignStartHorizontal, CheckCheck, Copy, Filter, Grid, Grid3x3, LayoutDashboard, LayoutGrid, Move, Image as ImageIcon, Check as CheckIcon, Settings, Settings2, Share2, Trash2, Wand2, X, Video, ArrowBigUpDash, ArrowBigDownDash, RefreshCw, SwatchBook, Sun, MoonStar, LogOut, ChevronDown, Info, ExternalLink, ArrowUpRight, CircleDollarSign, Palette, CalendarClock, CupSoda, Pizza, Soup, Cookie, Hand, Coins, ArrowRight, Link, Share, Github, Twitter, Trash } from "@tamagui/lucide-icons";
-import { BlurView } from "expo-blur";
-import { Image } from "expo-image";
-import { Slot, useRouter } from "expo-router";
-import { ReactNode, useCallback, useState } from "react";
-import { Linking, Pressable, StatusBar, TextInput, TouchableOpacity, useWindowDimensions, ViewStyle } from "react-native";
+import {
+  AlignStartHorizontal,
+  CheckCheck,
+  Copy,
+  Filter,
+  Info,
+  Move,
+  Settings,
+  Share,
+  Trash,
+  Wand2,
+  X,
+} from "@tamagui/lucide-icons";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import {
+  Pressable,
+  StatusBar,
+  TouchableOpacity,
+  ViewStyle,
+} from "react-native";
 import Animated from "react-native-reanimated";
-import { G } from "react-native-svg";
-import { View, Text, useTheme, XStack, YStack, getTokens, ScrollView, Button, SizableText, Separator, Group, CheckboxProps, Checkbox, Label, Progress, Slider, Header, H1, Accordion, Paragraph, Square, Input, InputFrame, Avatar } from "tamagui";
-import { ToolbarOptionFooter } from "./ToolbarOptionFooter";
-import { ToolbarOptionHeader } from "./ToolbarOptionHeader";
-import { LayoutView } from "./LayoutView";
-import { SettingsView } from "./SettingsView";
+import { ScrollView, Text, useTheme, View, YStack } from "tamagui";
+import { DetailsView } from "./DetailsView";
 import { FilterView } from "./FilterView";
+import { LayoutView } from "./LayoutView";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const ToolbarItems = [
-  'close',
-  'copy',
-  'move',
-  'selectAll',
-  'delete',
-  'settings',
-  'filter',
-  'share',
-  'layout',
-  'close',
-  'organise',
-  'info'
-] as const
-type ToolbarItemType = typeof ToolbarItems[number];
-
+  "close",
+  "copy",
+  "move",
+  "selectAll",
+  "delete",
+  "settings",
+  "filter",
+  "share",
+  "layout",
+  "close",
+  "organise",
+  "info",
+] as const;
+type ToolbarItemType = (typeof ToolbarItems)[number];
 
 interface ToolbarProps {
-  items:
-  {
+  items: {
     [key in ToolbarItemType]?: {
-      iconColor?: string,
-      textColor?: string,
-      onPress?: () => void
-    }
-  }
-  visible: boolean
+      iconColor?: string;
+      textColor?: string;
+      onPress?: () => void;
+    };
+  };
+  visible: boolean;
 }
 
-export function Toolbar({
-  items,
-  visible,
-}: ToolbarProps) {
+export function Toolbar({ items, visible }: ToolbarProps) {
   // const theme = useTheme()
-  const router = useRouter()
-  const gotoSettings = () => router.push('/albums/settings')
+  const router = useRouter();
+  const gotoSettings = () => router.push("/albums/settings");
 
   // console.log(theme.background.get())
-  const [activeOption, setActiveOption] = useState<'organise' | 'filter' | 'layout' | 'settings' | null>(null)
-  const [opened, setOpened] = useState(false)
+  const [activeOption, setActiveOption] = useState<ToolbarItemType | null>(
+    null
+  );
+  // "organise" | "filter" | "layout" | "settings"
+  const [opened, setOpened] = useState(false);
 
-  const theme = useTheme()
-  const overlayColor = theme.color1.get()
-
+  const theme = useTheme();
+  const overlayColor = theme.color1.get();
 
   function onToolbarOptionPress(option: typeof activeOption) {
-    setOpened(true)
-    setActiveOption(option)
+    setOpened(true);
+    setActiveOption(option);
   }
   function onToolbarOptionClose() {
-    setOpened(false)
-    setActiveOption(null)
+    setOpened(false);
+    setActiveOption(null);
   }
 
-
   if (!visible || Object.keys(items).length < 1) {
-    return null
+    return null;
   }
 
   return (
     <>
-      {
-        opened && activeOption !== 'organise' &&
+      {opened && activeOption !== "organise" && (
         <>
-
-          <StatusBar
-            translucent
-            backgroundColor={theme.background05.val}
-          />
+          <StatusBar translucent backgroundColor={theme.background05.val} />
 
           <Pressable
             onPress={onToolbarOptionClose}
@@ -99,25 +100,25 @@ export function Toolbar({
               zIndex: 100,
             }}
           />
-
         </>
-      }
+      )}
 
       <View
         animation={"slow"}
-        style={[{
-          position: "absolute",
-          bottom: 0,
-          zIndex: 109,
-          userSelect: "none",
-          alignSelf: "center",
-          overflow: "hidden",
-        },
-        opened && {
-          width: opened ? "96%" : undefined,
-          maxWidth: opened ? "96%" : "80%",
-          maxHeight: "96%",
-        }
+        style={[
+          {
+            position: "absolute",
+            bottom: 0,
+            zIndex: 109,
+            userSelect: "none",
+            alignSelf: "center",
+            overflow: "hidden",
+          },
+          opened && {
+            width: opened ? "96%" : undefined,
+            maxWidth: opened ? "96%" : "80%",
+            maxHeight: "96%",
+          },
         ]}
         p="$1"
         px={"$1.5"}
@@ -128,8 +129,7 @@ export function Toolbar({
         borderWidth={"$0.5"}
         borderColor={"$borderColor"}
       >
-        {
-          opened && activeOption !== 'organise' &&
+        {opened && activeOption !== "organise" && (
           <>
             {/* <ToolbarOptionHeader
               icon={ToolbarIcons[activeOption ?? "layout"]}
@@ -137,8 +137,15 @@ export function Toolbar({
             /> */}
 
             <YStack gap="$3">
-              {activeOption === 'filter' && <FilterView close={onToolbarOptionClose} />}
-              {activeOption === 'layout' && <LayoutView close={onToolbarOptionClose} />}
+              {activeOption === "filter" && (
+                <FilterView close={onToolbarOptionClose} />
+              )}
+              {activeOption === "layout" && (
+                <LayoutView close={onToolbarOptionClose} />
+              )}
+              {items.close && activeOption === "info" && (
+                <DetailsView close={onToolbarOptionClose} />
+              )}
               {/* {activeOption === 'settings' && <SettingsView />} */}
             </YStack>
 
@@ -148,95 +155,76 @@ export function Toolbar({
               onCancel={onToolbarOptionClose}
             /> */}
           </>
-        }
-
+        )}
 
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           paddingVertical="$1"
         >
-          {
-            activeOption === 'organise' &&
+          {activeOption === "organise" && (
             <>
-              <ToolBarButton
-                type={"close"}
-                onPress={onToolbarOptionClose}
-              />
-              <ToolBarButton
-                type={"copy"}
-              />
-              <ToolBarButton
-                type={"move"}
-              />
-              <ToolBarButton
-                type={"selectAll"}
-                text="Select All"
-              />
-              <ToolBarButton
-                type={"delete"}
-              />
-              <ToolBarButton
-                type={"share"}
-                disabled
-              />
+              <ToolBarButton type={"close"} onPress={onToolbarOptionClose} />
+              <ToolBarButton type={"copy"} />
+              <ToolBarButton type={"move"} />
+              <ToolBarButton type={"selectAll"} text="Select All" />
+              <ToolBarButton type={"delete"} />
+              <ToolBarButton type={"share"} disabled />
             </>
-          }
+          )}
 
-          {
-            !opened &&
+          {!opened &&
             Object.keys(items).map((key) => (
               <ToolBarButton
                 key={key}
                 type={key as ToolbarItemType}
                 iconColor={items[key as ToolbarItemType]?.iconColor}
                 textColor={items[key as ToolbarItemType]?.textColor}
-                disabled={key == 'share'}
+                disabled={key == "share"}
                 // disabled
                 onPress={() => {
-                  onToolbarOptionPress(key as typeof activeOption)
-                  items[key as ToolbarItemType]?.onPress?.()
-                  if (key === 'settings') {
-                    gotoSettings()
-                    return
+                  onToolbarOptionPress(key as typeof activeOption);
+                  items[key as ToolbarItemType]?.onPress?.();
+                  if (key === "settings") {
+                    gotoSettings();
+                    return;
                   }
-                  if (key === 'close') {
-                    onToolbarOptionClose()
-                    return
+                  if (key === "close") {
+                    onToolbarOptionClose();
+                    return;
                   }
                 }}
               />
-            ))
-          }
+            ))}
         </ScrollView>
       </View>
     </>
-  )
+  );
 }
 
 const ToolbarIcons: {
-  [key in ToolbarItemType]: any
+  [key in ToolbarItemType]: any;
 } = {
-  "close": X,
-  "copy": Copy,
-  "move": Move,
-  "selectAll": CheckCheck,
-  "delete": Trash,
-  "settings": Settings,
-  "filter": Filter,
-  "share": Share,
-  "layout": AlignStartHorizontal,
-  "organise": Wand2,
-  'info': Info
-}
+  close: X,
+  copy: Copy,
+  move: Move,
+  selectAll: CheckCheck,
+  delete: Trash,
+  settings: Settings,
+  filter: Filter,
+  share: Share,
+  layout: AlignStartHorizontal,
+  organise: Wand2,
+  info: Info,
+};
 
 interface ToolBarButtonProps {
-  type: ToolbarItemType
+  type: ToolbarItemType;
   iconColor?: string;
   textColor?: string;
   text?: string;
   onPress?: () => void;
-  style?: ViewStyle
+  style?: ViewStyle;
   disabled?: boolean;
 }
 
@@ -245,11 +233,11 @@ export function ToolBarButton({
   iconColor,
   textColor,
   text,
-  onPress = () => { },
+  onPress = () => {},
   disabled,
-  style
+  style,
 }: ToolBarButtonProps) {
-  const Icon = ToolbarIcons[type]
+  const Icon = ToolbarIcons[type];
   return (
     <TouchableOpacity
       activeOpacity={0.8}
@@ -259,7 +247,7 @@ export function ToolBarButton({
         style,
         disabled && {
           opacity: 0.5,
-        }
+        },
       ]}
     >
       <YStack
@@ -267,8 +255,8 @@ export function ToolBarButton({
         padding="$2"
         paddingTop="$2.5"
         minWidth={"$6"}
-      // aspectRatio={1}
-      // backgroundColor={"$blue3"}
+        // aspectRatio={1}
+        // backgroundColor={"$blue3"}
       >
         <Icon size={"$1"} color={iconColor} />
         <Text
@@ -276,8 +264,10 @@ export function ToolBarButton({
           color={textColor}
           opacity={1}
           textTransform="capitalize"
-        >{text ?? type}</Text>
+        >
+          {text ?? type}
+        </Text>
       </YStack>
     </TouchableOpacity>
-  )
+  );
 }
