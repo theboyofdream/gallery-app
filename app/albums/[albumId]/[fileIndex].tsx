@@ -50,6 +50,7 @@ export default function FilePage() {
   const [] = useState(2);
 
   const router = useRouter();
+  const { size } = getTokens();
   const { width, height } = useWindowDimensions();
 
   const { albumId } = useGlobalSearchParams();
@@ -57,6 +58,8 @@ export default function FilePage() {
 
   const { albumItemColumns } = useSettings();
   const footerImageEstimatedSize = Math.max(width / (albumItemColumns * 2), 60);
+  const footerImagePadding = size["$1.5"].val / 2
+
   const { activeAlbumId, albums, items } = useAlbumStore();
   const album = albumId ? albums[albumId as string] : albums[activeAlbumId];
 
@@ -70,7 +73,6 @@ export default function FilePage() {
   // const footerListref = useRef<FlatList<string>>(null)
 
   const theme = useTheme();
-  const { size } = getTokens();
 
   const { overlayVisible, toggleOverlayVisibility } = useFilePageState();
 
@@ -155,17 +157,16 @@ export default function FilePage() {
         <AppHeader
           title={
             selectionOn
-              ? `${selectedItems.length.toString().padStart(2, "0")} item${
-                  selectedItems.length === 1 ? "" : "s"
-                } selected`
+              ? `${selectedItems.length.toString().padStart(2, "0")} item${selectedItems.length === 1 ? "" : "s"
+              } selected`
               : activeFile.filename
           }
           subTitle={
             !selectionOn && activeFile.modificationTime
               ? format(
-                  new Date(activeFile.modificationTime),
-                  "dd MMM y hh:mm a"
-                ) ?? ""
+                new Date(activeFile.modificationTime),
+                "dd MMM y hh:mm a"
+              ) ?? ""
               : ""
           }
           type={selectionOn ? "cancel" : "back"}
@@ -211,10 +212,10 @@ export default function FilePage() {
                 id={id}
                 width={width}
                 height={height}
-                // onPress={() => {
-                //   toggleOverlayVisibility()
-                //   // console.log("file pressed")
-                // }}
+              // onPress={() => {
+              //   toggleOverlayVisibility()
+              //   // console.log("file pressed")
+              // }}
               />
             );
           }}
@@ -243,66 +244,82 @@ export default function FilePage() {
         // paddingBottom={"$2"}
         gap="$2"
       >
-        <View style={{ flex: 1 }}>
-          {/* <FlatList */}
+        <View style={{ flex: 1, width }}>
           <FlashList
             ref={footerListref}
             horizontal
             showsHorizontalScrollIndicator={false}
             data={album.items}
-            // getItemLayout={(data, index) => ({
-            //   // length: data?.length ?? 0,
-            //   length: footerImageEstimatedSize,
-            //   // offset: (footerImageEstimatedSize * index),
-            //   offset: footerImageEstimatedSize * index + (width / 2) - (footerImageEstimatedSize),
-            //   // offset: (footerImageEstimatedSize * (index + 1)) + space["$1.5"].val * 3,
-            //   index,
-            // })}
             initialScrollIndex={
               selectionOn ? undefined : Number(activeIndex) ?? 0
             }
             extraData={[selectionOn, selectedItems]}
-            estimatedItemSize={footerImageEstimatedSize}
-            renderItem={({ item: id, index }) => {
-              return (
-                <ZStack
-                  borderRadius="$6"
-                  overflow={"hidden"}
-                  marginHorizontal={"$1.5"}
-                  width={footerImageEstimatedSize}
-                  height={footerImageEstimatedSize}
-                >
-                  <File
-                    id={id}
-                    width={footerImageEstimatedSize}
-                    height={footerImageEstimatedSize}
-                    contentFit="cover"
-                    onPress={() => {
-                      setActiveIndex(index);
-                      mainImageListRef.current?.setIndex(index, true);
-                    }}
-                    onLongPress={() => {
-                      // console.log('longpress')
-                      addOrRemoveSelectedAlbumItem(album.id, id);
-                    }}
-                  />
-
-                  {selectionOn && (
-                    <XStack>
-                      <XStack padding="$2">
-                        <Checkbox
-                          checked={selectedItems.includes(id)}
-                          onCheckedChange={(_) => {
-                            console.log(_);
-                            addOrRemoveSelectedAlbumItem(album.id, id);
-                          }}
-                        />
-                      </XStack>
-                    </XStack>
-                  )}
-                </ZStack>
-              );
+            estimatedListSize={{
+              width,
+              height: footerImageEstimatedSize
             }}
+            estimatedItemSize={footerImageEstimatedSize}
+            ItemSeparatorComponent={() => <View width={"$0.75"} />}
+            renderItem={({ item: id, index }) => (
+              <FooterImage
+                id={id}
+                size={footerImageEstimatedSize}
+                selectionOn={selectionOn}
+                isSelected={selectedItems.includes(id)}
+                onPress={() => {
+                  setActiveIndex(index);
+                  mainImageListRef.current?.setIndex(index, true);
+                }}
+                onLongPress={() => {
+                  // console.log('longpress')
+                  addOrRemoveSelectedAlbumItem(album.id, id);
+                }}
+                onSelectionChange={() => {
+                  addOrRemoveSelectedAlbumItem(album.id, id);
+                }}
+              />
+            )
+              // {
+              // return (
+              //   <ZStack
+              //     borderRadius="$6"
+              //     overflow={"hidden"}
+              //     // marginHorizontal={"$1.5"}
+              //     width={footerImageEstimatedSize}
+              //     height={footerImageEstimatedSize}
+              //   >
+              //     <File
+              //       id={id}
+              //       width={footerImageEstimatedSize}
+              //       height={footerImageEstimatedSize}
+              //       contentFit="cover"
+              //       onPress={() => {
+              //         setActiveIndex(index);
+              //         mainImageListRef.current?.setIndex(index, true);
+              //       }}
+              //       onLongPress={() => {
+              //         // console.log('longpress')
+              //         addOrRemoveSelectedAlbumItem(album.id, id);
+              //       }}
+              //     />
+
+              //     {selectionOn && (
+              //       <XStack>
+              //         <XStack padding="$2">
+              //           <Checkbox
+              //             checked={selectedItems.includes(id)}
+              //             onCheckedChange={(_) => {
+              //               console.log(_);
+              //               addOrRemoveSelectedAlbumItem(album.id, id);
+              //             }}
+              //           />
+              //         </XStack>
+              //       </XStack>
+              //     )}
+              //   </ZStack>
+              // );
+              // }
+            }
             ListHeaderComponent={<View style={{ width: size["$1.5"].val }} />}
             ListFooterComponent={<View style={{ width: size["$1.5"].val }} />}
           />
@@ -356,6 +373,58 @@ export default function FilePage() {
     </View>
   );
 }
+
+interface FooterImage {
+  id: string
+  size: number
+  selectionOn: boolean
+  isSelected: boolean
+  onPress: () => void
+  onLongPress: () => void
+  onSelectionChange: () => void
+}
+
+const FooterImage = memo(
+  ({
+    id,
+    size,
+    selectionOn,
+    isSelected,
+    onPress,
+    onLongPress,
+    onSelectionChange
+  }: FooterImage) => {
+    return (
+      <ZStack
+        borderRadius="$6"
+        overflow={"hidden"}
+        // marginHorizontal={"$1.5"}
+        width={size}
+        height={size}
+      >
+        <File
+          id={id}
+          width={size}
+          height={size}
+          contentFit="cover"
+          onPress={onPress}
+          onLongPress={onLongPress}
+        />
+
+        {selectionOn && (
+          <XStack>
+            <XStack padding="$2">
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={onSelectionChange}
+              />
+            </XStack>
+          </XStack>
+        )}
+      </ZStack>
+    )
+  }
+)
 
 interface FileProps {
   id: string;
