@@ -1,34 +1,32 @@
-import { useAlbum, useAlbums } from "@/hooks";
+import { usePermissions } from "@/hooks";
+import { useAlbumStore } from "@/zustand";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Text, View } from "tamagui";
 
 export default function SplashScreen() {
   const router = useRouter();
 
-  const { hasPermission } = useAlbums()
-
-  const [redirectingIn, setRedirectingIn] = useState(3)
-  let interval: NodeJS.Timer | null = null
+  const { permissionStatus } = usePermissions()
+  const findAlbums = useAlbumStore(state => state.findAlbums)
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setRedirectingIn(prev => prev - 1)
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [])
-
-  useEffect(() => {
-    if (redirectingIn <= 0) {
-      interval && clearInterval(interval)
-      router.push("/permissions")
+    switch (permissionStatus) {
+      case 'undetermined':
+        return
+      case 'denied':
+        router.push('/permissions')
+        break;
+      case 'granted':
+        findAlbums()
+        setTimeout(() => router.push('/albums'), 1000);
+        break;
     }
-  }, [redirectingIn])
+  }, [permissionStatus])
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <Text>Splash</Text>
-      <Text>{redirectingIn} in seconds</Text>
     </View>
   )
 }

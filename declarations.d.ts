@@ -26,4 +26,10 @@ declare global {
   type SortingOrder = "asc" | "desc";
 
   type MediaType = MediaTypeValue | MediaTypeValue[];
+
+
+  type AppPermissionStatus =
+    'granted' |
+    'undetermined' | // User hasn't granted or denied the permission yet.
+    'denied'
 }

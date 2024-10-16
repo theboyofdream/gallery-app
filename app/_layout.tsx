@@ -9,8 +9,7 @@ import { createTamagui, TamaguiProvider, Theme, useTheme } from "tamagui";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar, useColorScheme } from "react-native";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { useSettings } from "@/zustand";
-import { ShareIntentProvider } from "expo-share-intent";
+import { useSettings } from "@/zustand"
 
 const tamaguiConfig = createTamagui(defaultConfig);
 
@@ -46,8 +45,6 @@ export default function RootLayout() {
   }
 
   return (
-    // Provide the client to your App
-    // <ShareIntentProvider>
     <QueryClientProvider client={queryClient}>
       <TamaguiProvider config={tamaguiConfig}>
         <Theme name={themeName}>
@@ -55,7 +52,6 @@ export default function RootLayout() {
         </Theme>
       </TamaguiProvider>
     </QueryClientProvider>
-    // </ShareIntentProvider>
   );
 }
 
@@ -64,7 +60,7 @@ function Routes() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: background.val }}>
       <StatusBar translucent backgroundColor={background.val} />
-      <Slot initialRouteName="/splashscreen" />
+      <Slot />
       {/* <Stack
         screenOptions={{
           contentStyle: {

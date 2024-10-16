@@ -1,4 +1,4 @@
-import { useAlbums } from "@/hooks";
+import { usePermissions } from "@/hooks";
 import { useAlbumStore } from "@/zustand";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
@@ -9,18 +9,15 @@ let albumsFetched = false
 export default function PermissionsPage() {
   const router = useRouter();
 
-  const { hasPermission, requestPermission } = useAlbums();
-  const { findAlbums } = useAlbumStore()
+  const { permissionStatus, requestPermission } = usePermissions();
+  const hasPermission = permissionStatus === 'granted'
+  const findAlbums = useAlbumStore(state => state.findAlbums)
 
   useEffect(() => {
-    if (hasPermission) {
-      if (!albumsFetched) {
-        findAlbums()
-        albumsFetched = true
-      }
-      setTimeout(() => {
-        router.push("/albums");
-      }, 1000);
+    if (hasPermission && !albumsFetched) {
+      findAlbums()
+      albumsFetched = true
+      setTimeout(() => router.push("/albums"), 1000);
     }
   }, [hasPermission]);
 

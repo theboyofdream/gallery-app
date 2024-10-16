@@ -1,4 +1,4 @@
-import { Album, getAlbumAsync, getAlbumsAsync, getAssetsAsync } from "expo-media-library";
+import { Album, getAlbumsAsync, getAssetsAsync } from "expo-media-library";
 import { create } from "zustand";
 import { combine } from "zustand/middleware";
 import { useFilters } from "./useFilters";
@@ -77,7 +77,6 @@ export const useAlbumStore = create(
       activeAlbumItemId: "",
       activeAlbumItemIndex: 0,
       items: {} as Record<string, AlbumItem>,
-      // selectedItems: {} as Record<string, AlbumItem>,
     },
     (set, get) => ({
 
@@ -104,9 +103,6 @@ export const useAlbumStore = create(
             }
           }
         }
-
-        // albums.map(album => {
-        // })
 
         set({ albumIds })
       },
