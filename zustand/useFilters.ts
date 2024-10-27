@@ -17,11 +17,11 @@ export const useFilters = create(
         ...get(),
         ...filters
       })
-      useAlbumStore.getState().findAlbums()
+      // useAlbumStore.getState().findAlbums()
     },
     clearFilter() {
       set({ ...INITIAL_STATE })
-      useAlbumStore.getState().findAlbums()
+      // useAlbumStore.getState().findAlbums()
     }
   }))
 )

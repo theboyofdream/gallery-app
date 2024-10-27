@@ -21,6 +21,7 @@ export const AnimatedExpoImage = Animated.createAnimatedComponent(Image);
 
 export default function AlbumsPage() {
   const { albumIds, findAlbums } = useAlbumStore()
+  const { sortingOrder } = useFilters()
   const sortedAlbumIds = useMemo(() => {
     // pending implementation
     return albumIds
@@ -53,6 +54,7 @@ export default function AlbumsPage() {
           />}
         data={sortedAlbumIds}
         numColumns={albumColumns}
+        extraData={[sortingOrder,]}
         estimatedItemSize={estimatedItemSize}
         ListHeaderComponent={
           <YStack my="$4" pl="$2">

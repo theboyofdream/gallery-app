@@ -1,20 +1,18 @@
+import { useFilters } from "@/zustand"
 import { ArrowBigDownDash, ArrowBigUpDash, Filter, Image, Video } from "@tamagui/lucide-icons"
-import { Button, Group, Text, View, XStack, YStack } from "tamagui"
+import { useMemo, useState } from "react"
+import { Button, Group, Text, YStack } from "tamagui"
 import { CheckboxWithLabel } from "../CheckboxWithLabel"
-import { useEffect, useMemo, useState } from "react"
-import { useFilters, useSettings } from "@/zustand"
-import { ToolbarOptionHeader } from "./ToolbarOptionHeader"
 import { ToolbarOptionFooter } from "./ToolbarOptionFooter"
+import { ToolbarOptionHeader } from "./ToolbarOptionHeader"
 
 interface FilterViewProps {
   close: () => void
 }
 
-export function FilterView(
-  {
-    close
-  }: FilterViewProps
-) {
+export function FilterView({
+  close
+}: FilterViewProps) {
 
   const filters = useFilters()
 

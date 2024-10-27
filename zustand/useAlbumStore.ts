@@ -2,6 +2,7 @@ import { Album, getAlbumsAsync, getAssetsAsync } from "expo-media-library";
 import { create } from "zustand";
 import { combine } from "zustand/middleware";
 import { useFilters } from "./useFilters";
+import { useEffect } from "react";
 
 // useAlbumStore.getState()
 async function updateAlbumDetails(album: Album | AlbumDetails) {
@@ -78,73 +79,106 @@ export const useAlbumStore = create(
       activeAlbumItemIndex: 0,
       items: {} as Record<string, AlbumItem>,
     },
-    (set, get) => ({
+    (set, get) => {
+      const unsubscribeFilterStore = useFilters.subscribe((state, prevState) => {
+        const { albumIds, albums, items } = get()
+        // console.log('subs', state, prevState)
+        console.log('subs', state.sortBy, prevState.sortBy)
+        if (state.sortingOrder !== prevState.sortingOrder) {
+          set({ albumIds: albumIds.reverse() })
+        }
+        if (state.sortBy !== prevState.sortBy) {
+          // // albumIds: 
+          // albumIds.sort((a, b) => {
+          //   albums[a].items
+          //   albums[b]
+          // })
 
-      async findAlbums() {
-        let albums = await getAlbumsAsync({ includeSmartAlbums: false })
-        let albumIds = [] as string[]
-
-        for (let album of albums) {
-          if (album.assetCount > 0) {
-            const thumbnail = await updateAlbumThumbnail(album)
-            if (thumbnail) {
-              set({
-                albums: {
-                  ...get().albums,
-                  [album.id]: {
-                    ...album,
-                    thumbnail,
-                    items: []
-                  }
-                }
-              })
-              updateAlbumDetails(album)
-              albumIds.push(album.id)
-            }
+          // set({
+          // })
+        }
+        if (state.mediaType !== prevState.mediaType) {
+          if (state.mediaType === 'photo') {
+            albumIds.map(id => {
+              albums[id].items
+            })
           }
         }
+      })
 
-        set({ albumIds })
-      },
+      return {
+        async findAlbums() {
+          let albums = await getAlbumsAsync({ includeSmartAlbums: false })
+          let albumIds = [] as string[]
 
-      async getAlbumDetails(album: Album) {
-        await updateAlbumDetails(album)
-      },
-
-      setActiveAlbum(id: string, index: number) {
-        set({
-          activeAlbumItemId: id,
-          activeAlbumItemIndex: index
-        })
-      },
-
-      setAlbumDetails(album: AlbumDetails) {
-        set({
-          albums: {
-            ...get().albums,
-            [album.id]: {
-              ...album,
+          for (let album of albums) {
+            if (album.assetCount > 0) {
+              const thumbnail = await updateAlbumThumbnail(album)
+              if (thumbnail) {
+                set({
+                  albums: {
+                    ...get().albums,
+                    [album.id]: {
+                      ...album,
+                      thumbnail,
+                      items: []
+                    }
+                  }
+                })
+                updateAlbumDetails(album)
+                albumIds.push(album.id)
+              }
             }
           }
-        })
-      },
 
-      removeAlbum(album: Album | AlbumDetails) {
-        set({
-          albumIds: get().albumIds.filter(id => id !== album.id)
-        })
-      },
+          // if (useFilters.getState().sortingOrder === 'desc') {
+          //   albumIds = albumIds.reverse()
+          // }
 
-      setAlbumItems(items: Record<string, AlbumItem>) {
-        set({
-          items: {
-            ...get().items,
-            ...items,
-          }
-        })
-      },
+          set({ albumIds })
+        },
 
-    }))
+        async getAlbumDetails(album: Album) {
+          await updateAlbumDetails(album)
+        },
+
+        setActiveAlbum(id: string, index: number) {
+          set({
+            activeAlbumItemId: id,
+            activeAlbumItemIndex: index
+          })
+        },
+
+        setAlbumDetails(album: AlbumDetails) {
+          set({
+            albums: {
+              ...get().albums,
+              [album.id]: {
+                ...album,
+              }
+            }
+          })
+        },
+
+        removeAlbum(album: Album | AlbumDetails) {
+          set({
+            albumIds: get().albumIds.filter(id => id !== album.id)
+          })
+        },
+
+        setAlbumItems(items: Record<string, AlbumItem>) {
+          set({
+            items: {
+              ...get().items,
+              ...items,
+            }
+          })
+        },
+
+        unsubscribeFilterStore
+      }
+    }
+  )
 )
 
 // useAlbumStore.getState().findAlbums()

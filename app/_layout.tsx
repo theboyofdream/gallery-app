@@ -60,7 +60,7 @@ function Routes() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: background.val }}>
       <StatusBar translucent backgroundColor={background.val} />
-      <Slot />
+      {/* <Slot /> */}
       {/* <Stack
         screenOptions={{
           contentStyle: {
@@ -68,6 +68,18 @@ function Routes() {
           },
         }}
       /> */}
+      <Stack
+        initialRouteName="splashscren"
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: background.val }
+        }}>
+        <Stack.Screen name='splashscreen' />
+        <Stack.Screen name='permissions' />
+        <Stack.Screen name='albums' />
+        <Stack.Screen name='settings' />
+        <Stack.Screen name='+not-found' />
+      </Stack>
     </SafeAreaView>
   );
 }
