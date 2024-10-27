@@ -1,36 +1,30 @@
+import { AlbumItem } from "@/components";
 import { Toolbar } from "@/components/Toolbar";
-import { useColumns } from "@/hooks/useColumns";
 import { useFilters, useSettings } from "@/zustand";
 import { useAlbumStore } from "@/zustand/useAlbumStore";
-import { MasonryFlashList } from "@shopify/flash-list";
+import { FlashList } from "@shopify/flash-list";
 import { Image } from 'expo-image';
 import { useRouter } from "expo-router";
-import { memo, useEffect, useMemo } from "react";
-import { RefreshControl, TouchableOpacity, useWindowDimensions } from "react-native";
+import { memo, useMemo } from "react";
+import { FlatList, RefreshControl, useWindowDimensions } from "react-native";
 import Animated from "react-native-reanimated";
 import { useQuery } from "react-query";
-import { getTokens, ScrollView, Text, View, YStack } from "tamagui";
-
-
-const blurhash =
-  // '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
-  // 'UCKWFb4f~5K5HR~60kD:snE6%H?Bx[9ywLxE';
-  'UAO;MUogfQog~qj[fQj[j[fQfQfQxufQfQfQ';
+import { getTokens, Text, YStack } from "tamagui";
 
 export const AnimatedExpoImage = Animated.createAnimatedComponent(Image);
 
 export default function AlbumsPage() {
+  const router = useRouter()
+
   const { albumIds, findAlbums } = useAlbumStore()
   const { sortingOrder } = useFilters()
   const sortedAlbumIds = useMemo(() => {
-    // pending implementation
     return albumIds
   }, [albumIds])
 
 
   const { albumColumns } = useSettings()
-  const { width } = useWindowDimensions()
-  const estimatedItemSize = width / albumColumns
+
 
   const { isLoading, refetch } = useQuery({
     queryKey: ["albums"],
@@ -38,14 +32,29 @@ export default function AlbumsPage() {
     queryFn: findAlbums
   })
 
-  // const filters = useFilters()
-  // useEffect(() => {
-  //   refetch()
-  // }, [filters])
+  const window = useWindowDimensions()
+  const tokens = getTokens()
+  const computedAlbumItemProps = useMemo(() => {
+    let padding = tokens.space['$1.5'].val
+    let borderRadius = tokens.radius.$6.val
+    return {
+      width: (window.width / albumColumns) - (padding * 2),
+      // height: (window.width / albumColumns) - (padding * 2),
+      padding,
+      imgBorderRadius: borderRadius
+    }
+  }, [window, tokens, albumColumns])
+
+  const ListHeaderComponent = memo(() => (
+    <YStack my="$4" pl="$2">
+      <Text fontSize={"$10"}>Albums</Text>
+      <Text opacity={0.5}>Total {sortedAlbumIds.length}</Text>
+    </YStack>
+  ))
 
   return (
-    <View gap="$2" flex={1}>
-      <MasonryFlashList
+    <YStack gap="$2" flex={1}>
+      <FlashList
         refreshing={isLoading}
         refreshControl={
           <RefreshControl
@@ -54,21 +63,24 @@ export default function AlbumsPage() {
           />}
         data={sortedAlbumIds}
         numColumns={albumColumns}
-        extraData={[sortingOrder,]}
-        estimatedItemSize={estimatedItemSize}
-        ListHeaderComponent={
-          <YStack my="$4" pl="$2">
-            <Text fontSize={"$10"}>Albums</Text>
-            <Text opacity={0.5}>Total {sortedAlbumIds.length}</Text>
-          </YStack>
-        }
+        extraData={[
+          computedAlbumItemProps
+        ]}
+        estimatedItemSize={computedAlbumItemProps.width}
+        ListHeaderComponent={ListHeaderComponent}
         renderItem={({ item, index }) => (
-          <Album id={item} index={index} />
+          <AlbumItem
+            {...computedAlbumItemProps}
+            id={item}
+            onPress={(id) => {
+              router.navigate({
+                pathname: "/[albumId]",
+                params: { albumId: id },
+              });
+            }}
+          />
         )}
-        ListFooterComponent={
-          <YStack m="$10">
-          </YStack>
-        }
+        ListFooterComponent={<YStack m="$10" />}
       />
       <Toolbar
         items={{
@@ -77,62 +89,6 @@ export default function AlbumsPage() {
         }}
         visible
       />
-    </View>
+    </YStack>
   );
 }
-
-interface AlbumProps {
-  id: string;
-  index: number;
-}
-const Album = memo(({
-  id,
-  index,
-}: AlbumProps) => {
-  const router = useRouter();
-  const { albums, setActiveAlbum } = useAlbumStore()
-  const { space, radius } = getTokens();
-  const album = albums[id]
-
-  // console.log(album.thumbnail)
-  if (album?.items?.length < 1) {
-    return null
-  }
-
-  return (
-    <TouchableOpacity
-      activeOpacity={0.9}
-      style={{
-        width: "100%",
-        padding: space.$2.val,
-      }}
-      onPress={() => {
-        setActiveAlbum(id, index);
-        router.navigate({
-          pathname: "/[albumId]",
-          params: { albumId: album.id },
-        });
-      }}
-    >
-      <AnimatedExpoImage
-        // sharedTransitionTag={`album-${album.thumbnail.id}`}
-        source={{ uri: album?.thumbnail?.uri }}
-        placeholder={{ blurhash }}
-        style={{
-          width: "100%",
-          aspectRatio: 1,
-          // aspectRatio: item.assets[0].width / item.assets[0].height,
-          borderRadius: radius.$7.val,
-          overflow: "hidden",
-        }}
-        contentFit="cover"
-      />
-      <YStack paddingLeft="$2">
-        <Text fontSize={"$5"}>{album?.title}</Text>
-        <Text fontSize={"$3"} opacity={0.5}>
-          {album?.assetCount}
-        </Text>
-      </YStack>
-    </TouchableOpacity>
-  )
-})

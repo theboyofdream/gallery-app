@@ -5,6 +5,7 @@ import AwesomeGallery, {
 } from "@/components/react-native-awesome-gallery";
 import { ToolBarButton } from "@/components/Toolbar";
 import { DetailsView } from "@/components/Toolbar/DetailsView";
+import { useBackHandler } from "@/hooks";
 import { useAlbumStore, useSelectStore, useSettings } from "@/zustand";
 import { FlashList } from "@shopify/flash-list";
 import { format } from "date-fns/format";
@@ -94,35 +95,7 @@ export default function FilePage() {
     "info" | "delete" | "copy" | "move" | null
   >(null);
 
-  // Navigation
-  const navigation = useNavigation();
-
-  // Effect
-  useEffect(() => {
-    // setTimeout(() => {
-    //   footerListref.current?.scrollToIndex({
-    //     index: activeIndex,
-    //     animated: true,
-    //     viewOffset: (width / 2) - (footerImageEstimatedSize / 2),
-    //   })
-    // }, 1000);
-
-    const backListener = (e) => {
-      e.preventDefault();
-      console.log("onback");
-      // if (selectionOn) {
-      // }
-      emptySelectedAlbumItems(album.id);
-      // Do your stuff here
-      navigation.dispatch(e.data.action);
-    };
-
-    navigation.addListener("beforeRemove", backListener);
-
-    return () => {
-      navigation.removeListener("beforeRemove", backListener);
-    };
-  }, []);
+  useBackHandler(() => emptySelectedAlbumItems(album.id), selectedItems.length > 0)
 
   const { space } = getTokens();
 
@@ -469,52 +442,52 @@ const File = memo(
   }
 );
 
-interface FooterFileProps {
-  fileId: string;
-  index: number;
-  onPress: () => void;
-}
-function FooterFile({ fileId, index, onPress }: FooterFileProps) {
-  const { width } = useWindowDimensions();
-  const { albumItemColumns } = useSettings();
-  const footerImageEstimatedSize = Math.max(width / (albumItemColumns * 2), 60);
+// interface FooterFileProps {
+//   fileId: string;
+//   index: number;
+//   onPress: () => void;
+// }
+// function FooterFile({ fileId, index, onPress }: FooterFileProps) {
+//   const { width } = useWindowDimensions();
+//   const { albumItemColumns } = useSettings();
+//   const footerImageEstimatedSize = Math.max(width / (albumItemColumns * 2), 60);
 
-  return (
-    <ZStack
-      borderRadius="$6"
-      overflow={"hidden"}
-      marginHorizontal={"$1.5"}
-      width={footerImageEstimatedSize}
-      height={footerImageEstimatedSize}
-    >
-      <File
-        id={fileId}
-        width={footerImageEstimatedSize}
-        height={footerImageEstimatedSize}
-        contentFit="cover"
-        onPress={() => {
-          setActiveIndex(index);
-          mainImageListRef.current?.setIndex(index, true);
-        }}
-        onLongPress={() => {
-          // console.log('longpress')
-          addOrRemoveSelectedAlbumItem(album.id, id);
-        }}
-      />
+//   return (
+//     <ZStack
+//       borderRadius="$6"
+//       overflow={"hidden"}
+//       marginHorizontal={"$1.5"}
+//       width={footerImageEstimatedSize}
+//       height={footerImageEstimatedSize}
+//     >
+//       <File
+//         id={fileId}
+//         width={footerImageEstimatedSize}
+//         height={footerImageEstimatedSize}
+//         contentFit="cover"
+//         onPress={() => {
+//           setActiveIndex(index);
+//           mainImageListRef.current?.setIndex(index, true);
+//         }}
+//         onLongPress={() => {
+//           // console.log('longpress')
+//           addOrRemoveSelectedAlbumItem(album.id, id);
+//         }}
+//       />
 
-      {selectionOn && (
-        <XStack>
-          <XStack padding="$2">
-            <Checkbox
-              checked={selectedItems.includes(id)}
-              onCheckedChange={(_) => {
-                console.log(_);
-                addOrRemoveSelectedAlbumItem(album.id, id);
-              }}
-            />
-          </XStack>
-        </XStack>
-      )}
-    </ZStack>
-  );
-}
+//       {selectionOn && (
+//         <XStack>
+//           <XStack padding="$2">
+//             <Checkbox
+//               checked={selectedItems.includes(id)}
+//               onCheckedChange={(_) => {
+//                 console.log(_);
+//                 addOrRemoveSelectedAlbumItem(album.id, id);
+//               }}
+//             />
+//           </XStack>
+//         </XStack>
+//       )}
+//     </ZStack>
+//   );
+// }

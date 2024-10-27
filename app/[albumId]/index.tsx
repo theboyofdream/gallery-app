@@ -1,9 +1,9 @@
 import { useAlbumStore, useSelectStore, useSettings } from "@/zustand";
-import { MasonryFlashList } from "@shopify/flash-list";
+import { FlashList, MasonryFlashList } from "@shopify/flash-list";
 import { ArrowLeft, Check, ChevronLeft } from "@tamagui/lucide-icons";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { memo, useEffect, useMemo } from "react";
-import { Dimensions, Pressable, TouchableOpacity } from "react-native";
+import { Dimensions, FlatList, Pressable, TouchableOpacity, useWindowDimensions } from "react-native";
 import { Button, getTokens, Text, XStack, YStack, ZStack } from "tamagui";
 import { Image } from "expo-image";
 import { Toolbar } from "@/components/Toolbar";
@@ -11,6 +11,8 @@ import { MotiView } from "moti"
 import { AnimatedExpoImage } from "../albums";
 import { AppHeader } from "@/components/AppHeader";
 import { Checkbox } from "@/components/Checkbox";
+import { AlbumItem } from "@/components";
+import { useBackHandler } from "@/hooks";
 
 
 export default function AlbumPage() {
@@ -26,29 +28,20 @@ export default function AlbumPage() {
 
   const { albumItemColumns, albumItemLayoutType } = useSettings();
 
-  const estimatedItemSize = useMemo(() => {
-    return albumItemLayoutType === "grid" ? Dimensions.get('screen').width / albumItemColumns : undefined;
-  }, [albumItemLayoutType]);
-
   const { selectedAlbumItems, addOrRemoveSelectedAlbumItem, emptySelectedAlbumItems } = useSelectStore()
   const selectionOn = selectedAlbumItems[album.id]?.length > 0
   const selectedItems = selectedAlbumItems[album.id] ?? []
-  // Navigation
-  const navigation = useNavigation();
 
-  // Effect
-  useEffect(() => {
-    navigation.addListener('beforeRemove', (e) => {
-      e.preventDefault();
-      // console.log('onback');
-      // if (selectionOn) {
-      //   // return;
-      // }
-      emptySelectedAlbumItems(album.id)
-      // Do your stuff here
-      navigation.dispatch(e.data.action);
-    });
-  }, []);
+  const window = useWindowDimensions()
+  const tokens = getTokens()
+  const computedAlbumItemProps = useMemo(() => {
+    let padding = tokens.space['$0.25'].val
+    return {
+      width: (window.width / albumItemColumns) - (padding * 2),
+      padding,
+      layout: albumItemLayoutType
+    }
+  }, [window, tokens, albumItemColumns, albumItemLayoutType])
 
   return (
     <YStack flex={1}>
@@ -68,6 +61,32 @@ export default function AlbumPage() {
       />
 
       <MasonryFlashList
+        data={album.items}
+        numColumns={albumItemColumns}
+        keyExtractor={item => item}
+        estimatedItemSize={computedAlbumItemProps.width}
+        extraData={[
+          albumItemLayoutType
+        ]}
+        renderItem={({ item, index }) => (
+          <AlbumItem
+            {...computedAlbumItemProps}
+            id={item}
+            type='item'
+            onPress={(id) => {
+              router.push({
+                pathname: "/[albumId]/[fileIndex]",
+                params: {
+                  albumId: id,
+                  fileIndex: index,
+                },
+              })
+            }}
+          />
+        )}
+      />
+
+      {/* <MasonryFlashList
         // refreshing={isLoading}
         // refreshControl={
         //   <RefreshControl refreshing={isLoading} onRefresh={refetch} />
@@ -130,10 +149,10 @@ export default function AlbumPage() {
                   // alignItems="center"
                   backgroundColor={"$background025"}
                 >
-                  {/* {
-                  // selectedItems.includes(id) &&
-                  <Check color={"$backkground"} />
-                } */}
+                  {
+                    // selectedItems.includes(id) &&
+                    <Check color={"$backkground"} />
+                  }
                   <XStack
                     padding="$2"
                   >
@@ -152,7 +171,7 @@ export default function AlbumPage() {
             }
           </YStack>
         )}
-      />
+      /> */}
       <Toolbar
         items={
           selectionOn ? {
@@ -190,7 +209,7 @@ interface AlbumItemProps {
   onPress?: () => void;
   onLongPress?: () => void;
 }
-const AlbumItem = memo(({
+const AlbumItem1 = memo(({
   albumId,
   id,
   index,

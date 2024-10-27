@@ -12,8 +12,9 @@ import {
   X,
 } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  BackHandler,
   Pressable,
   StatusBar,
   TouchableOpacity,
@@ -24,6 +25,7 @@ import { ScrollView, Text, useTheme, View, YStack } from "tamagui";
 import { DetailsView } from "./DetailsView";
 import { FilterView } from "./FilterView";
 import { LayoutView } from "./LayoutView";
+import { useBackHandler } from "@/hooks";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -57,7 +59,7 @@ interface ToolbarProps {
 export function Toolbar({ items, visible }: ToolbarProps) {
   // const theme = useTheme()
   const router = useRouter();
-  const gotoSettings = () => router.push("/albums/settings");
+  const gotoSettings = () => router.push("/settings");
 
   // console.log(theme.background.get())
   const [activeOption, setActiveOption] = useState<ToolbarItemType | null>(
@@ -77,6 +79,8 @@ export function Toolbar({ items, visible }: ToolbarProps) {
     setOpened(false);
     setActiveOption(null);
   }
+
+  useBackHandler(onToolbarOptionClose, opened)
 
   if (!visible || Object.keys(items).length < 1) {
     return null;
@@ -144,7 +148,22 @@ export function Toolbar({ items, visible }: ToolbarProps) {
                 <LayoutView close={onToolbarOptionClose} />
               )}
               {items.close && activeOption === "info" && (
-                <DetailsView close={onToolbarOptionClose} />
+                <DetailsView
+                  close={onToolbarOptionClose}
+                  open={false}
+                  details={{
+                    id: "",
+                    filename: "",
+                    uri: "",
+                    mediaType: "audio",
+                    mediaSubtypes: undefined,
+                    width: 0,
+                    height: 0,
+                    creationTime: 0,
+                    modificationTime: 0,
+                    duration: 0,
+                    albumId: undefined
+                  }} />
               )}
               {/* {activeOption === 'settings' && <SettingsView />} */}
             </YStack>
@@ -233,7 +252,7 @@ export function ToolBarButton({
   iconColor,
   textColor,
   text,
-  onPress = () => {},
+  onPress = () => { },
   disabled,
   style,
 }: ToolBarButtonProps) {
@@ -255,8 +274,8 @@ export function ToolBarButton({
         padding="$2"
         paddingTop="$2.5"
         minWidth={"$6"}
-        // aspectRatio={1}
-        // backgroundColor={"$blue3"}
+      // aspectRatio={1}
+      // backgroundColor={"$blue3"}
       >
         <Icon size={"$1"} color={iconColor} />
         <Text

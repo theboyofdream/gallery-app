@@ -27,7 +27,7 @@ export function AppHeader(
       <StatusBar
         backgroundColor={theme.background075.val}
       />
-      <XStack alignItems="center" paddingVertical="$0.5" backgroundColor={"$background075"} zIndex={99}>
+      <XStack alignItems="center" paddingVertical="$2" backgroundColor={"$background075"} zIndex={99}>
         <Button
           aspectRatio={1}
           icon={type === 'cancel' ? X : ChevronLeft}
@@ -42,7 +42,7 @@ export function AppHeader(
           backgroundColor={"$colorTransparent"}
         />
         <YStack my="$1">
-          <Text fontSize={"$5"}>{title}</Text>
+          <Text fontSize={"$6"}>{title}</Text>
           {
             subTitle &&
             <Text opacity={0.5} fontSize={"$1"}>
