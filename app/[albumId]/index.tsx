@@ -8,7 +8,7 @@ import { Button, getTokens, Text, XStack, YStack, ZStack } from "tamagui";
 import { Image } from "expo-image";
 import { Toolbar } from "@/components/Toolbar";
 import { MotiView } from "moti"
-import { AnimatedExpoImage } from ".";
+import { AnimatedExpoImage } from "../albums";
 import { AppHeader } from "@/components/AppHeader";
 import { Checkbox } from "@/components/Checkbox";
 
@@ -89,7 +89,7 @@ export default function AlbumPage() {
                   // emptySelectedAlbumItems(album.id)
                 } else {
                   router.push({
-                    pathname: "/albums/[albumId]/[fileIndex]",
+                    pathname: "/[albumId]/[fileIndex]",
                     params: {
                       albumId: album.id,
                       fileIndex: index,

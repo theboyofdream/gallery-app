@@ -109,7 +109,7 @@ const Album = memo(({
       onPress={() => {
         setActiveAlbum(id, index);
         router.navigate({
-          pathname: "/albums/[albumId]",
+          pathname: "/[albumId]",
           params: { albumId: album.id },
         });
       }}
