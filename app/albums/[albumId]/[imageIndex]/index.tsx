@@ -47,7 +47,7 @@ const useFilePageState = create(
   )
 );
 
-export default function FilePage() {
+export default function ImageCarousel() {
   const [] = useState(2);
 
   const router = useRouter();
@@ -55,7 +55,7 @@ export default function FilePage() {
   const { width, height } = useWindowDimensions();
 
   const { albumId } = useGlobalSearchParams();
-  const { fileIndex } = useLocalSearchParams();
+  const { imageIndex } = useLocalSearchParams();
 
   const { albumItemColumns } = useSettings();
   const footerImageEstimatedSize = Math.max(width / (albumItemColumns * 2), 60);
@@ -64,7 +64,7 @@ export default function FilePage() {
   const { activeAlbumId, albums, items } = useAlbumStore();
   const album = albumId ? albums[albumId as string] : albums[activeAlbumId];
 
-  const [activeIndex, setActiveIndex] = useState(Number(fileIndex) ?? 0);
+  const [activeIndex, setActiveIndex] = useState(Number(imageIndex) ?? 0);
   const activeFile = items[album.items[activeIndex]]
 
   const ref = useRef<FlashList<string>>(null);
@@ -156,7 +156,7 @@ export default function FilePage() {
           ref={mainImageListRef}
           style={{ flex: 1 }}
           data={album.items}
-          initialIndex={Number(fileIndex) ?? 0}
+          initialIndex={Number(imageIndex) ?? 0}
           numToRender={3}
           // disableVerticalSwipe
           disableSwipeUp

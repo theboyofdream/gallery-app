@@ -8,14 +8,14 @@ import { Button, getTokens, Text, XStack, YStack, ZStack } from "tamagui";
 import { Image } from "expo-image";
 import { Toolbar } from "@/components/Toolbar";
 import { MotiView } from "moti"
-import { AnimatedExpoImage } from "../albums/albums";
+import { AnimatedExpoImage } from "..";
 import { AppHeader } from "@/components/AppHeader";
 import { Checkbox } from "@/components/Checkbox";
 import { AlbumItem } from "@/components";
 import { useBackHandler } from "@/hooks";
 
 
-export default function AlbumPage() {
+export default function AlbumImageSplitList() {
   const router = useRouter();
 
   const { albumId } = useLocalSearchParams();
@@ -75,10 +75,10 @@ export default function AlbumPage() {
             type='item'
             onPress={(id) => {
               router.push({
-                pathname: "/[albumId]/[fileIndex]",
+                pathname: "/albums/[albumId]/[imageIndex]",
                 params: {
                   albumId: album.id,
-                  fileIndex: index,
+                  imageIndex: index,
                 },
               })
             }}

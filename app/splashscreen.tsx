@@ -1,4 +1,4 @@
-import { usePermissions } from "@/src/hooks";
+import { usePermissions } from "@/hooks";
 import { useAlbumStore } from "@/zustand";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
@@ -19,7 +19,7 @@ export default function SplashScreen() {
         break;
       case 'granted':
         findAlbums()
-        setTimeout(() => router.push('/albums'), 1000);
+        setTimeout(() => router.push('/albums'), 500);
         break;
     }
   }, [permissionStatus])

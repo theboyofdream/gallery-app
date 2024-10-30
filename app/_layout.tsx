@@ -66,14 +66,14 @@ function Routes() {
           headerShown: false,
           contentStyle: { backgroundColor: 'transparent' }
         }}>
-
         <Stack.Screen name='splashscreen' />
         <Stack.Screen name='permissions' />
-
-        <Stack.Screen name='albums' />
-        <Stack.Screen name='[albumId]' />
-
         <Stack.Screen name='settings' />
+
+        <Stack.Screen name='albums/index' />
+        <Stack.Screen name='albums/[albumId]/images' />
+        <Stack.Screen name='albums/[albumId]/albums-images' />
+        <Stack.Screen name='albums/[albumId]/[imageIndex]/index' />
 
         <Stack.Screen name='+not-found' />
       </Stack>

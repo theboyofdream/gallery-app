@@ -74,7 +74,7 @@ export default function AlbumList() {
             id={item}
             onPress={(id) => {
               router.navigate({
-                pathname: "/[albumId]",
+                pathname: "/albums/[albumId]/images",
                 params: { albumId: id },
               });
             }}
