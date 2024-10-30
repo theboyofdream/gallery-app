@@ -8,7 +8,7 @@ import { Button, getTokens, Text, XStack, YStack, ZStack } from "tamagui";
 import { Image } from "expo-image";
 import { Toolbar } from "@/components/Toolbar";
 import { MotiView } from "moti"
-import { AnimatedExpoImage } from "../albums";
+import { AnimatedExpoImage } from "../albums/albums";
 import { AppHeader } from "@/components/AppHeader";
 import { Checkbox } from "@/components/Checkbox";
 import { AlbumItem } from "@/components";

@@ -1,4 +1,4 @@
-import { usePermissions } from "@/hooks";
+import { usePermissions } from "@/src/hooks";
 import { useAlbumStore } from "@/zustand";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";

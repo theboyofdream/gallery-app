@@ -25,7 +25,7 @@ import { ScrollView, Text, useTheme, View, YStack } from "tamagui";
 import { DetailsView } from "./DetailsView";
 import { FilterView } from "./FilterView";
 import { LayoutView } from "./LayoutView";
-import { useBackHandler } from "@/hooks";
+import { useBackHandler } from "@/src/hooks";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 

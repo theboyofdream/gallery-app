@@ -13,7 +13,7 @@ import { getTokens, Text, YStack } from "tamagui";
 
 export const AnimatedExpoImage = Animated.createAnimatedComponent(Image);
 
-export default function AlbumsPage() {
+export default function AlbumList() {
   const router = useRouter()
 
   const { albumIds, findAlbums } = useAlbumStore()
