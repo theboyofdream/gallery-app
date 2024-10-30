@@ -77,7 +77,7 @@ export default function AlbumPage() {
               router.push({
                 pathname: "/[albumId]/[fileIndex]",
                 params: {
-                  albumId: id,
+                  albumId: album.id,
                   fileIndex: index,
                 },
               })
@@ -86,92 +86,6 @@ export default function AlbumPage() {
         )}
       />
 
-      {/* <MasonryFlashList
-        // refreshing={isLoading}
-        // refreshControl={
-        //   <RefreshControl refreshing={isLoading} onRefresh={refetch} />
-        // }
-        data={album.items}
-        numColumns={albumItemColumns}
-        extraData={[selectionOn, selectedItems]}
-        estimatedItemSize={estimatedItemSize}
-        keyExtractor={(item) => item}
-        renderItem={({ item: id, index }) => (
-          <YStack position="relative">
-            <AlbumItem
-              albumId={album.id}
-              id={id}
-              index={index}
-              onPress={() => {
-                if (selectionOn) {
-                  addOrRemoveSelectedAlbumItem(album.id, id)
-                  // emptySelectedAlbumItems(album.id)
-                } else {
-                  router.push({
-                    pathname: "/[albumId]/[fileIndex]",
-                    params: {
-                      albumId: album.id,
-                      fileIndex: index,
-                    },
-                  })
-                }
-                // setActiveIndex(index)
-                // mainImageListRef.current?.setIndex(index, true)
-              }}
-              onLongPress={() => {
-                console.log('longpress')
-                addOrRemoveSelectedAlbumItem(album.id, id)
-              }}
-            />
-            {
-              selectionOn &&
-              <Pressable
-                onPress={() => {
-                  addOrRemoveSelectedAlbumItem(album.id, id)
-                }}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                }}
-              >
-                <XStack
-                  position="absolute"
-                  top={0}
-                  left={0}
-                  width={"100%"}
-                  height={"100%"}
-                  flex={1}
-                  // zIndex={999}
-                  // justifyContent="center"
-                  // alignItems="center"
-                  backgroundColor={"$background025"}
-                >
-                  {
-                    // selectedItems.includes(id) &&
-                    <Check color={"$backkground"} />
-                  }
-                  <XStack
-                    padding="$2"
-                  >
-
-                    <Checkbox
-                      checked={selectedItems.includes(id)}
-                      onCheckedChange={_ => {
-                        console.log(_)
-                        addOrRemoveSelectedAlbumItem(album.id, id)
-                      }}
-                    />
-                  </XStack>
-                </XStack>
-              </Pressable>
-
-            }
-          </YStack>
-        )}
-      /> */}
       <Toolbar
         items={
           selectionOn ? {

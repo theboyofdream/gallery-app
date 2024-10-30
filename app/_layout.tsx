@@ -61,7 +61,7 @@ function Routes() {
     <SafeAreaView style={{ flex: 1, backgroundColor: background.val }}>
       <StatusBar translucent backgroundColor={background.val} />
       <Stack
-        initialRouteName="splashscren"
+        initialRouteName="splashscreen"
         screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: 'transparent' }

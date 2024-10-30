@@ -65,9 +65,7 @@ export default function FilePage() {
   const album = albumId ? albums[albumId as string] : albums[activeAlbumId];
 
   const [activeIndex, setActiveIndex] = useState(Number(fileIndex) ?? 0);
-  const activeFile = useMemo(() => {
-    return items[album.items[activeIndex]];
-  }, [activeIndex, album, items]);
+  const activeFile = items[album.items[activeIndex]]
 
   const ref = useRef<FlashList<string>>(null);
   const footerListref = useRef<FlashList<string>>(null);
@@ -110,6 +108,7 @@ export default function FilePage() {
     // })
   }
 
+  // return <></>
   return (
     <View style={{ flex: 1 }}>
       <View

@@ -4,7 +4,7 @@ import { Image, ImageSource } from "expo-image";
 import { Text, YStack } from "tamagui";
 import { useAlbumStore } from "@/zustand";
 import { useMemo } from "react";
-
+import Animated from "react-native-reanimated";
 
 const BLUR_HASH =
   // '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
@@ -41,7 +41,8 @@ export function AlbumItem({
 }: AlbumItemProps) {
 
   const {
-    uri,
+    thumbnailUri,
+    // thumbnailId,
     title,
     aspectRatio,
     itemsCount
@@ -49,7 +50,8 @@ export function AlbumItem({
     if (type === 'folder') {
       let album = useAlbumStore.getState().albums[id]
       return {
-        uri: album?.thumbnail?.uri,
+        thumbnailUri: album?.thumbnail?.uri,
+        // thumbnailId: album?.thumbnail.id,
         title: album.title,
         itemsCount: album.assetCount,
         // height: layout === 'grid' ? width : album.thumbnail.height
@@ -59,13 +61,16 @@ export function AlbumItem({
 
     let item = useAlbumStore.getState().items[id]
     return {
-      uri: item.uri,
+      thumbnailUri: item.uri,
       // height: layout === 'grid' ? width : item.height,
       aspectRatio: layout === 'grid' ? 1 : item.width / item.height,
     }
   }, [id])
 
   return (
+    // <Animated.View
+    //   sharedTransitionTag={`album-thumbnail-${thumbnailId}`}
+    // >
     <PressableBox
       style={{ padding }}
       onPress={() => onPress(id)}
@@ -73,7 +78,7 @@ export function AlbumItem({
     >
 
       <Image
-        source={{ uri }}
+        source={{ uri: thumbnailUri }}
         placeholder={{ blurhash: BLUR_HASH }}
         style={{
           width,
@@ -90,5 +95,6 @@ export function AlbumItem({
       </YStack>
 
     </PressableBox>
+    // </Animated.View>
   )
 }
