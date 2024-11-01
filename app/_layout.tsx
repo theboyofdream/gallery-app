@@ -16,7 +16,7 @@ const tamaguiConfig = createTamagui(defaultConfig);
 // TypeScript types across all Tamagui APIs
 type Conf = typeof tamaguiConfig;
 declare module "@tamagui/core" {
-  interface TamaguiCustomConfig extends Conf { }
+    interface TamaguiCustomConfig extends Conf { }
 }
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -26,57 +26,64 @@ SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient()
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const { theme } = useSettings();
-  const themeName = theme === "system" ? colorScheme : theme;
+    const colorScheme = useColorScheme();
+    const { theme } = useSettings();
+    const themeName = theme === "system" ? colorScheme : theme;
 
-  const [loaded] = useFonts({
-    Inter: require("../assets/fonts/Inter.ttf"),
-  });
+    const [loaded] = useFonts({
+        Inter: require("../assets/fonts/Inter.ttf"),
+    });
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
+    useEffect(() => {
+        if (loaded) {
+            SplashScreen.hideAsync();
+        }
+    }, [loaded]);
+
+    if (!loaded) {
+        return null;
     }
-  }, [loaded]);
 
-  if (!loaded) {
-    return null;
-  }
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TamaguiProvider config={tamaguiConfig}>
-        <Theme name={themeName}>
-          <Routes />
-        </Theme>
-      </TamaguiProvider>
-    </QueryClientProvider>
-  );
+    return (
+        <QueryClientProvider client={queryClient}>
+            <TamaguiProvider config={tamaguiConfig}>
+                <Theme name={themeName}>
+                    <Routes />
+                </Theme>
+            </TamaguiProvider>
+        </QueryClientProvider>
+    );
 }
 
 function Routes() {
-  const { background } = useTheme();
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: background.val }}>
-      <StatusBar translucent backgroundColor={background.val} />
-      <Stack
-        initialRouteName="splashscreen"
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: 'transparent' }
-        }}>
-        <Stack.Screen name='splashscreen' />
-        <Stack.Screen name='permissions' />
-        <Stack.Screen name='settings' />
+    const { background } = useTheme();
+    return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: background.val }}>
+            <StatusBar translucent backgroundColor={background.val} />
+            <Stack
+                initialRouteName="splashscreen"
+                screenOptions={{
+                    headerShown: false,
+                    contentStyle: { backgroundColor: 'transparent' }
+                }}>
+                <Stack.Screen name='index' />
+                <Stack.Screen name='splashscreen' />
+                <Stack.Screen name='permissions' />
+                <Stack.Screen
+                    name='settings'
+                    options={{
+                        animation: 'slide_from_right'
+                    }}
+                />
 
-        <Stack.Screen name='albums/index' />
-        <Stack.Screen name='albums/[albumId]/images' />
-        <Stack.Screen name='albums/[albumId]/albums-images' />
-        <Stack.Screen name='albums/[albumId]/[imageIndex]/index' />
+                <Stack.Screen name='albums/index' />
+                <Stack.Screen name='albums/[albumId]/images' />
+                <Stack.Screen name='albums/[albumId]/albums-images' />
+                <Stack.Screen name='albums/[albumId]/[imageIndex]/index' />
 
-        <Stack.Screen name='+not-found' />
-      </Stack>
-    </SafeAreaView>
-  );
+                <Stack.Screen name='+not-found' />
+            </Stack>
+            {/* <Slot /> */}
+        </SafeAreaView>
+    );
 }
